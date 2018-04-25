@@ -1,4 +1,4 @@
-# PARC-Archive-Importer
+# PARC Archive Importer
 A tool for injecting files into *PAR archives (used in all PS3 Yakuza games and Binary Domain).
 
 ## How to use
