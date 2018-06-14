@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using System.Windows;
-using  System.Threading;
 
 namespace PARC_Archive_Importer
 {
@@ -49,18 +43,17 @@ namespace PARC_Archive_Importer
         }
         static int ParseSingleByte(byte[] input, int adr)
         {
-            string first = input[adr].ToString("X").ToString();
+            string first = input[adr].ToString("X");
             int firstint = Convert.ToInt32(input[adr]);
             string resultparse = first;
-            int resultint = int.Parse(resultparse, System.Globalization.NumberStyles.HexNumber);
-            return resultint;
+            return int.Parse(resultparse, System.Globalization.NumberStyles.HexNumber);
         }
         static int ParseOffset(byte[] input, int adr)
         {
-            string first = input[adr].ToString("X").ToString();
-            string second = input[adr + 1].ToString("X").ToString();
-            string third = input[adr + 2].ToString("X").ToString();
-            string forth = input[adr + 3].ToString("X").ToString();
+            string first = input[adr].ToString("X");
+            string second = input[adr + 1].ToString("X");
+            string third = input[adr + 2].ToString("X");
+            string forth = input[adr + 3].ToString("X");
 
             int firstint = Convert.ToInt32(input[adr]);
             int secondint = Convert.ToInt32(input[adr + 1]);
@@ -69,12 +62,11 @@ namespace PARC_Archive_Importer
 
             string resultparse = first;
 
-            if (secondint < 16) { resultparse = resultparse + 0; resultparse = resultparse + second; } else { resultparse = resultparse + second; }
-            if (thirdint < 16) { resultparse = resultparse + 0; resultparse = resultparse + third; } else { resultparse = resultparse + third; }
-            if (forthint < 16) { resultparse = resultparse + 0; resultparse = resultparse + forth; } else { resultparse = resultparse + forth; }
+            if (secondint < 16) { resultparse += 0; resultparse += second; } else { resultparse += second; }
+            if (thirdint < 16) { resultparse += 0; resultparse += third; } else { resultparse += third; }
+            if (forthint < 16) { resultparse += 0; resultparse += forth; } else { resultparse += forth; }
 
-            int resultint = int.Parse(resultparse, System.Globalization.NumberStyles.HexNumber);
-            return resultint;
+            return int.Parse(resultparse, System.Globalization.NumberStyles.HexNumber);
         }
         static byte[] ReturnToSender(string Hex)
         {
@@ -82,8 +74,8 @@ namespace PARC_Archive_Importer
             string Hex4 = null;
             if (Hex.Length % 2 == 1)
             {
-                Hex4 = Hex4 + "0";
-                Hex4 = Hex4 + Hex;
+                Hex4 += "0";
+                Hex4 += Hex;
                 Hex = null;
                 Hex = Hex4;
             }
@@ -98,7 +90,7 @@ namespace PARC_Archive_Importer
             for (int i = 0; i < Hex.Length; i = i + 2)
             {
                 HexArr[m] = Convert.ToByte(Hex.Substring(i, 2), 16);
-                m += 1;
+                m++;
             }
             return HexArr;
         }
@@ -108,7 +100,7 @@ namespace PARC_Archive_Importer
             for (int i = 0; i <= bytecount - 1; i++)
             {
                 tempbytearr[i] = importarray[offsetinarray];
-                offsetinarray += 1;
+                offsetinarray++;
             }
             return tempbytearr;
         }
@@ -127,7 +119,7 @@ namespace PARC_Archive_Importer
         int Foldercount;
         int Filestartoffset;
         int Folderstartoffset;
-        int DifferenceAfterInj;
+        //int DifferenceAfterInj;
         public string[] folderlist;
         public string namecurrentimport;
         public Form1()
@@ -147,8 +139,8 @@ namespace PARC_Archive_Importer
             Foldercount = ParseOffset(OrigArchive, 16);
             Filestartoffset = ParseOffset(OrigArchive, 28);
             Folderstartoffset = ParseOffset(OrigArchive, 20);
-            DifferenceAfterInj = 0;
-            List<String> filelist = new List<String>();
+            //DifferenceAfterInj = 0;
+            List<string> filelist = new List<string>();
             filelist.Clear();
             string[] foldernames = new string[Filecount];
             int foldercounter = 0;
@@ -157,7 +149,7 @@ namespace PARC_Archive_Importer
                 int filesinfolder = ParseOffset(OrigArchive, Folderstartoffset + 8 + folder * 32);
                 for (int m = 0; m < filesinfolder; m++)
                     foldernames[foldercounter+m] = Encoding.ASCII.GetString(OrigArchive, folder * 64 + 32, 64).TrimEnd(new char[] { (char)0 }); ;
-                foldercounter=foldercounter+filesinfolder;
+                foldercounter += filesinfolder;
             }
 
             for (int ID = 1; ID <= Filecount; ID++)
@@ -179,7 +171,7 @@ namespace PARC_Archive_Importer
                     item.SubItems.Add(filestart.ToString());
                     item.SubItems.Add(filesizeoff.ToString());
                     item.SubItems.Add(filesizecompoff.ToString());
-                    item.SubItems.Add(iscompressed.ToString());
+                    item.SubItems.Add(iscompressed);
                     item.SubItems.Add(ID.ToString());
                     item.SubItems.Add(foldernames[ID - 1]);
                     listArch.Items.Add(item);
@@ -194,7 +186,7 @@ namespace PARC_Archive_Importer
             bool isitwide = true;
             for (int i = 0; i < listArch.Items.Count - 2; i++)
             {
-                if ((Int32.Parse(listArch.Items[i + 1].SubItems[2].Text) - Int32.Parse(listArch.Items[i].SubItems[2].Text)) % 2048 != 0)
+                if ((int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text)) % 2048 != 0)
                 {
                     isitwide = false;
                     break;
@@ -214,14 +206,17 @@ namespace PARC_Archive_Importer
                 try
                 {
                     OpenedArchName = Path.GetFileName(theDialog.FileName);
-                    this.Text = OpenedArchName + " - PARC Archive Importer";
+                    Text = OpenedArchName + " - PARC Archive Importer";
                     OpenedArchPath = Path.GetDirectoryName(theDialog.FileName);
-                    InterOpenedArchive = File.ReadAllBytes(theDialog.FileName.ToString());
+                    InterOpenedArchive = File.ReadAllBytes(theDialog.FileName);
                     listArch.Enabled = false;
                     listArch.Visible = false;
                     ParseSourceArray(InterOpenedArchive);
                     listArch.Enabled = true;
                     listArch.Visible = true;
+                    listViewdebug.Items.Clear();
+                    listViewdebug.Update();
+                    listViewdebug.Refresh();
 
                     foreach (ListViewItem item in listArch.Items)
                     {
@@ -267,16 +262,16 @@ namespace PARC_Archive_Importer
         }
         private void buttonWiden_Click(object sender, EventArgs e)
         {
-            this.Enabled = false;
+            Enabled = false;
             listArch.Enabled = false;
             listArch.Visible = false;
             int totaldifference = 0;
             for (int i = 0; i < listArch.Items.Count - 2; i++)
             {
-                int originalfilesize = Int32.Parse(listArch.Items[i + 1].SubItems[2].Text) - Int32.Parse(listArch.Items[i].SubItems[2].Text);
+                int originalfilesize = int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text);
                 if (originalfilesize % 2048 != 0)
                 {
-                    int Filesize = Int32.Parse(listArch.Items[i].SubItems[3].Text);
+                    int Filesize = int.Parse(listArch.Items[i].SubItems[3].Text);
 
                     int rightstepen = returnrightstepenparallel(Filesize);
 
@@ -287,15 +282,15 @@ namespace PARC_Archive_Importer
                     //change startpoints for files after this one
                     for (int m = i + 1; m < listArch.Items.Count; m++)
                     {
-                        listArch.Items[m].SubItems[2].Text = (Int32.Parse(listArch.Items[m].SubItems[2].Text) + differencenew).ToString();
-                        ChngInArray(4, 12 + Int32.Parse(listArch.Items[m].SubItems[1].Text), ReturnToSender((Int32.Parse(listArch.Items[m].SubItems[2].Text)).ToString("X")), InterOpenedArchive);
+                        listArch.Items[m].SubItems[2].Text = (int.Parse(listArch.Items[m].SubItems[2].Text) + differencenew).ToString();
+                        ChngInArray(4, 12 + int.Parse(listArch.Items[m].SubItems[1].Text), ReturnToSender((int.Parse(listArch.Items[m].SubItems[2].Text)).ToString("X")), InterOpenedArchive);
                     }
                 }
             }
             //change overall size
             ChngInArray(4, 12, ReturnToSender((ParseOffset(InterOpenedArchive, 12) + totaldifference).ToString("X")), InterOpenedArchive);
             listArch.Enabled = true;
-            this.Enabled = true;
+            Enabled = true;
             listArch.Visible = true;
             if (!iswide())
             {
@@ -315,20 +310,20 @@ namespace PARC_Archive_Importer
             SaveFileDialog DialogSave = new SaveFileDialog();
             DialogSave.Title = "Save Edited File";
             DialogSave.Filter = "PARC archives (*.par)|*.par";
-            DialogSave.FileName = (string)OpenedArchName;
-            DialogSave.InitialDirectory = (string)OpenedArchPath;
+            DialogSave.FileName = OpenedArchName;
+            DialogSave.InitialDirectory = OpenedArchPath;
 
             if (DialogSave.FileName != "" && DialogSave.ShowDialog() == DialogResult.OK)
             {
                 FileStream fcreate = File.Open(DialogSave.FileName, FileMode.Create, FileAccess.Write);
-                fcreate.Write(InterOpenedArchive, 0, Int32.Parse(listViewdebug.Items[0].SubItems[2].Text));
+                fcreate.Write(InterOpenedArchive, 0, int.Parse(listViewdebug.Items[0].SubItems[2].Text));
 
                 for (int m = 0; m < listArch.Items.Count; m++)
                 {
                     bool isimported = false;
                     for (int n = 0; n < listImport.Items.Count; n++)
                     {
-                        if (Int32.Parse(listImport.Items[n].SubItems[3].Text)-1 == m)
+                        if (int.Parse(listImport.Items[n].SubItems[3].Text)-1 == m)
                         {
                             FileStream import = File.Open(listImport.Items[n].SubItems[5].Text, FileMode.Open);
                             import.CopyTo(fcreate);
@@ -338,20 +333,20 @@ namespace PARC_Archive_Importer
                             break;
                         }
                     }
-                    if (!isimported) fcreate.Write(InterOpenedArchive, Int32.Parse(listViewdebug.Items[m].SubItems[2].Text), Int32.Parse(listViewdebug.Items[m].SubItems[4].Text));
+                    if (!isimported) fcreate.Write(InterOpenedArchive, int.Parse(listViewdebug.Items[m].SubItems[2].Text), int.Parse(listViewdebug.Items[m].SubItems[4].Text));
 
                     if (m < listViewdebug.Items.Count - 1)
                     {
-                        if (Int32.Parse(listArch.Items[m + 1].SubItems[2].Text) > (Int32.Parse(listArch.Items[m].SubItems[4].Text) + Int32.Parse(listArch.Items[m].SubItems[2].Text)))
+                        if (int.Parse(listArch.Items[m + 1].SubItems[2].Text) > (int.Parse(listArch.Items[m].SubItems[4].Text) + int.Parse(listArch.Items[m].SubItems[2].Text)))
                         {
-                            byte[] zeroes = new byte[Int32.Parse(listArch.Items[m + 1].SubItems[2].Text) - (Int32.Parse(listArch.Items[m].SubItems[4].Text) + Int32.Parse(listArch.Items[m].SubItems[2].Text))];
+                            byte[] zeroes = new byte[int.Parse(listArch.Items[m + 1].SubItems[2].Text) - (int.Parse(listArch.Items[m].SubItems[4].Text) + int.Parse(listArch.Items[m].SubItems[2].Text))];
                             fcreate.Write(zeroes, 0, zeroes.Length);
                         }
 
                     }
                     else if (m == listViewdebug.Items.Count - 1)
                     {
-                        byte[] zeroes = new byte[returnrightstepenparallel(Int32.Parse(listArch.Items[m].SubItems[3].Text)) * 2048 - Int32.Parse(listArch.Items[m].SubItems[3].Text)];
+                        byte[] zeroes = new byte[returnrightstepenparallel(int.Parse(listArch.Items[m].SubItems[3].Text)) * 2048 - int.Parse(listArch.Items[m].SubItems[3].Text)];
                         fcreate.Write(zeroes, 0, zeroes.Length);
                     }
 
@@ -369,7 +364,7 @@ namespace PARC_Archive_Importer
             OpenFileDialog theDialog = new OpenFileDialog();
             theDialog.Title = "Open Original File";
             theDialog.Filter = "All files (*.*)|*.*";
-            theDialog.InitialDirectory = (string)OpenedArchPath;
+            theDialog.InitialDirectory = OpenedArchPath;
             theDialog.Multiselect = true;
             if (theDialog.ShowDialog() == DialogResult.OK)
             {
@@ -381,9 +376,9 @@ namespace PARC_Archive_Importer
                     List<int> IDinarchive = new List<int>(); 
                     foreach (ListViewItem item in listArch.Items)
                     {
-                        if (item.Text.ToLower().ToString() == Path.GetFileName(InjectFile).ToLower())
+                        if (string.Equals(item.Text, Path.GetFileName(InjectFile), StringComparison.CurrentCultureIgnoreCase))
                         {
-                            IDinarchive.Add(Int32.Parse(item.SubItems[6].Text));
+                            IDinarchive.Add(int.Parse(item.SubItems[6].Text));
                         }
 
                     }
@@ -399,7 +394,7 @@ namespace PARC_Archive_Importer
                         injitem.SubItems.Add("Yes");
 
                         injitem.SubItems.Add(InjectFile);
-                        long length = new System.IO.FileInfo(InjectFile).Length;
+                        long length = new FileInfo(InjectFile).Length;
                         injitem.SubItems.Add(length.ToString());
                         listImport.Items.Add(injitem);
                     }
@@ -426,7 +421,7 @@ namespace PARC_Archive_Importer
                                 { 
                                     ListViewItem injitem = new ListViewItem();
                                     injitem.Text = Path.GetFileName(InjectFile);
-                                    long length = new System.IO.FileInfo(InjectFile).Length;
+                                    long length = new FileInfo(InjectFile).Length;
                                     injitem.SubItems.Add(listArch.Items[Injfile].SubItems[1].Text);
                                     injitem.SubItems.Add(listArch.Items[Injfile].SubItems[2].Text);
                                     injitem.SubItems.Add(listArch.Items[Injfile].SubItems[6].Text);
@@ -469,12 +464,12 @@ namespace PARC_Archive_Importer
             //change startpoints for files after this one
             for (int i = filenumber + 1; i < listArch.Items.Count; i++)
             {
-                ChngInArray(4, 12 + Int32.Parse(listArch.Items[i].SubItems[1].Text), ReturnToSender((ParseOffset(headerwd, 12 + Int32.Parse(listArch.Items[i].SubItems[1].Text)) + differencewd).ToString("X")), headerwd);
+                ChngInArray(4, 12 + int.Parse(listArch.Items[i].SubItems[1].Text), ReturnToSender((ParseOffset(headerwd, 12 + int.Parse(listArch.Items[i].SubItems[1].Text)) + differencewd).ToString("X")), headerwd);
             }
             //change sizes for imported file
-            ChngInArray(4, 4 + Int32.Parse(listArch.Items[filenumber].SubItems[1].Text), ReturnToSender(injectedfilesize.ToString("X")), headerwd);
-            ChngInArray(4, 8 + Int32.Parse(listArch.Items[filenumber].SubItems[1].Text), ReturnToSender(injectedfilesize.ToString("X")), headerwd);
-            headerwd[Int32.Parse(listArch.Items[filenumber].SubItems[1].Text)] = (byte)00;
+            ChngInArray(4, 4 + int.Parse(listArch.Items[filenumber].SubItems[1].Text), ReturnToSender(injectedfilesize.ToString("X")), headerwd);
+            ChngInArray(4, 8 + int.Parse(listArch.Items[filenumber].SubItems[1].Text), ReturnToSender(injectedfilesize.ToString("X")), headerwd);
+            headerwd[int.Parse(listArch.Items[filenumber].SubItems[1].Text)] = 0x00;
 
             return headerwd;
         }
@@ -482,7 +477,7 @@ namespace PARC_Archive_Importer
         private void buttonInject_Click(object sender, EventArgs e)
         {
 
-            this.Enabled = false;
+            Enabled = false;
             listArch.Visible = false;
             foreach (ListViewItem injectedfile in listImport.Items)
             {
@@ -504,9 +499,9 @@ namespace PARC_Archive_Importer
                     });
 
                     int originalfilesize;
-                    int i = Int32.Parse(injectedfile.SubItems[3].Text) - 1;
-                    if (listArch.Items.Count == Int32.Parse(injectedfile.SubItems[3].Text)) { originalfilesize = Int32.Parse(listArch.Items[i].SubItems[3].Text); }
-                    else { originalfilesize = Int32.Parse(listArch.Items[i + 1].SubItems[2].Text) - Int32.Parse(listArch.Items[i].SubItems[2].Text); }
+                    int i = int.Parse(injectedfile.SubItems[3].Text) - 1;
+                    if (listArch.Items.Count == int.Parse(injectedfile.SubItems[3].Text)) { originalfilesize = int.Parse(listArch.Items[i].SubItems[3].Text); }
+                    else { originalfilesize = int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text); }
 
                     
                     int differencenew = 2048 * rstepen - originalfilesize;
@@ -520,7 +515,7 @@ namespace PARC_Archive_Importer
 
 
             }
-            this.Enabled = true;
+            Enabled = true;
             listArch.Visible = true;
 
         }
