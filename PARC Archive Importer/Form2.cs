@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PARC_Archive_Importer
@@ -20,18 +14,18 @@ namespace PARC_Archive_Importer
 
             public override string ToString()
             {
-                return this.Text;
+                return Text;
             }
             public int GetTag()
             {
-                return Int32.Parse(this.Tag);
+                return int.Parse(Tag);
             }
         }
         public void ShowingArray(string[] array, string namefile)
         {
             for (int i=0; i<array.Length;i++)
             {
-                if (!String.IsNullOrEmpty(array[i]))
+                if (!string.IsNullOrEmpty(array[i]))
                 { 
                 CheckboxListItem cb1 = new CheckboxListItem();
                 cb1.Tag = i.ToString();

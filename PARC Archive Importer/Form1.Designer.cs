@@ -38,7 +38,7 @@
             this.ListFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.FileDescStart = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StartFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.fSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SizeComp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.IsCompressed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -119,7 +119,7 @@
             this.ListFileName,
             this.FileDescStart,
             this.StartFile,
-            this.Size,
+            this.fSize,
             this.SizeComp,
             this.IsCompressed,
             this.ID,
@@ -149,11 +149,11 @@
             this.StartFile.Text = "File Start";
             this.StartFile.Width = 70;
             // 
-            // Size
+            // fSize
             // 
-            this.Size.DisplayIndex = 4;
-            this.Size.Text = "Size";
-            this.Size.Width = 78;
+            this.fSize.DisplayIndex = 4;
+            this.fSize.Text = "Size";
+            this.fSize.Width = 78;
             // 
             // SizeComp
             // 
@@ -327,7 +327,7 @@
         private System.Windows.Forms.ColumnHeader ListFileName;
         private System.Windows.Forms.ColumnHeader FileDescStart;
         private System.Windows.Forms.ColumnHeader StartFile;
-        private System.Windows.Forms.ColumnHeader Size;
+        private System.Windows.Forms.ColumnHeader fSize;
         private System.Windows.Forms.ColumnHeader SizeComp;
         private System.Windows.Forms.ColumnHeader IsCompressed;
         private System.Windows.Forms.ColumnHeader ID;
