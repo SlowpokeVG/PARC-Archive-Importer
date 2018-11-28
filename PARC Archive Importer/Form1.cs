@@ -320,18 +320,21 @@ namespace PARC_Archive_Importer
 
                 for (int m = 0; m < listArch.Items.Count; m++)
                 {
+
                     bool isimported = false;
                     for (int n = 0; n < listImport.Items.Count; n++)
                     {
-                        if (int.Parse(listImport.Items[n].SubItems[3].Text)-1 == m)
-                        {
-                            FileStream import = File.Open(listImport.Items[n].SubItems[5].Text, FileMode.Open);
-                            import.CopyTo(fcreate);
-                            import.Flush();
-                            import.Close();
-                            isimported = true;
-                            break;
-                        }
+                        if (listImport.Items[n].SubItems[4].Text == "Yes")
+                            if (int.Parse(listImport.Items[n].SubItems[3].Text)-1 == m)
+                            {
+                                FileStream import = File.Open(listImport.Items[n].SubItems[5].Text, FileMode.Open);
+                                import.CopyTo(fcreate);
+                                import.Flush();
+                                import.Close();
+                                isimported = true;
+                                break;
+                            }
+                        
                     }
                     if (!isimported) fcreate.Write(InterOpenedArchive, int.Parse(listViewdebug.Items[m].SubItems[2].Text), int.Parse(listViewdebug.Items[m].SubItems[4].Text));
 
