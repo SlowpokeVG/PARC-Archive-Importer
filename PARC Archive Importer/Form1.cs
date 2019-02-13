@@ -244,22 +244,7 @@ namespace PARC_Archive_Importer
 
            
         }
-        int returnrightstepenparallel(int FileSize)
-        {
-            int rstepen = 1;
 
-            Parallel.For(0, (InterOpenedArchive.Length / 2048) + 1, (stepen, pls) => 
-            {
-                int poweredstepen = 2048 * stepen;
-                if (FileSize > poweredstepen && FileSize <= 2048 + poweredstepen)
-                {
-                    rstepen = stepen + 1;
-                    pls.Stop();
-                }
-
-            });
-            return rstepen;
-        }
         private void buttonWiden_Click(object sender, EventArgs e)
         {
             Enabled = false;
@@ -273,7 +258,7 @@ namespace PARC_Archive_Importer
                 {
                     int Filesize = int.Parse(listArch.Items[i].SubItems[3].Text);
 
-                    int rightstepen = returnrightstepenparallel(Filesize);
+                    int rightstepen = (int)Filesize / 2048 + 1;
 
                     int differencenew = 2048 * rightstepen - originalfilesize;
                     totaldifference += differencenew;
@@ -303,6 +288,7 @@ namespace PARC_Archive_Importer
                 buttonInportFiles.Enabled = true;
                 buttonWiden.Text = "Wide";
             }
+            ParseSourceArray(InterOpenedArchive);
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -349,7 +335,8 @@ namespace PARC_Archive_Importer
                     }
                     else if (m == listViewdebug.Items.Count - 1)
                     {
-                        byte[] zeroes = new byte[returnrightstepenparallel(int.Parse(listArch.Items[m].SubItems[3].Text)) * 2048 - int.Parse(listArch.Items[m].SubItems[3].Text)];
+                        
+                        byte[] zeroes = new byte[(int.Parse(listArch.Items[m].SubItems[3].Text) / 2048 + 1) * 2048 - int.Parse(listArch.Items[m].SubItems[3].Text)];
                         fcreate.Write(zeroes, 0, zeroes.Length);
                     }
 
@@ -489,21 +476,10 @@ namespace PARC_Archive_Importer
 
                     long filesize = long.Parse(injectedfile.SubItems[6].Text);
 
-                    int rstepen = 1;
-
-                    Parallel.For(0, (InterOpenedArchive.Length / 2048) + 1, (stepen, pls) =>
-                    {
-                        int poweredstepen = 2048 * stepen;
-                        if (filesize > poweredstepen && filesize <= 2048 + poweredstepen)
-                        {
-                            rstepen = stepen + 1;
-                            pls.Stop();
-                        }
-                    });
-
+                    int rstepen = (int)filesize / 2048 + 1;
                     int originalfilesize;
                     int i = int.Parse(injectedfile.SubItems[3].Text) - 1;
-                    if (listArch.Items.Count == int.Parse(injectedfile.SubItems[3].Text)) { originalfilesize = int.Parse(listArch.Items[i].SubItems[3].Text); }
+                    if (listArch.Items.Count == int.Parse(injectedfile.SubItems[3].Text)) { originalfilesize = int.Parse(listArch.Items[i].SubItems[4].Text); }
                     else { originalfilesize = int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text); }
 
                     
