@@ -256,7 +256,7 @@ namespace PARC_Archive_Importer
                 int originalfilesize = int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text);
                 if (originalfilesize % 2048 != 0)
                 {
-                    int Filesize = int.Parse(listArch.Items[i].SubItems[3].Text);
+                    int Filesize = int.Parse(listArch.Items[i].SubItems[4].Text);
 
                     int rightstepen = (int)Filesize / 2048 + 1;
 
