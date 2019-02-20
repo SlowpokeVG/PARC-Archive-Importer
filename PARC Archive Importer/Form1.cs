@@ -450,7 +450,7 @@ namespace PARC_Archive_Importer
         byte[] ChangedHeaderImport(int differencewd, int filenumber, byte[] headerwd, long injectedfilesize)
         {
             //change overall size
-            if (ParseOffset(InterOpenedArchive, 12) != 0)
+            if (ParseOffset(headerwd, 12) != 0)
                 ChngInArray(4, 12, ReturnToSender((ParseOffset(headerwd, 12) + differencewd).ToString("X")), headerwd);
 
             //change startpoints for files after this one
