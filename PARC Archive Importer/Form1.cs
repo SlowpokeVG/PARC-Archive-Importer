@@ -273,6 +273,7 @@ namespace PARC_Archive_Importer
                 }
             }
             //change overall size
+            if (ParseOffset(InterOpenedArchive, 12) != 0)
             ChngInArray(4, 12, ReturnToSender((ParseOffset(InterOpenedArchive, 12) + totaldifference).ToString("X")), InterOpenedArchive);
             listArch.Enabled = true;
             Enabled = true;
