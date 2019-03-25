@@ -12,8 +12,6 @@ namespace PARC_Archive_Importer
 
         public static void AppendAllBytes(string path, byte[] bytes)
         {
-            //argument-checking here.
-
             using (var stream = new FileStream(path, FileMode.Append))
             {
                 stream.Write(bytes, 0, bytes.Length);
@@ -70,7 +68,6 @@ namespace PARC_Archive_Importer
         }
         static byte[] ReturnToSender(string Hex)
         {
-            //string Hex = dec.ToString("X");
             string Hex4 = null;
             if (Hex.Length % 2 == 1)
             {
@@ -119,7 +116,7 @@ namespace PARC_Archive_Importer
         int Foldercount;
         int Filestartoffset;
         int Folderstartoffset;
-        //int DifferenceAfterInj;
+
         public string[] folderlist;
         public string namecurrentimport;
         public Form1()
@@ -139,7 +136,7 @@ namespace PARC_Archive_Importer
             Foldercount = ParseOffset(OrigArchive, 16);
             Filestartoffset = ParseOffset(OrigArchive, 28);
             Folderstartoffset = ParseOffset(OrigArchive, 20);
-            //DifferenceAfterInj = 0;
+
             List<string> filelist = new List<string>();
             filelist.Clear();
             string[] foldernames = new string[Filecount];
@@ -184,7 +181,7 @@ namespace PARC_Archive_Importer
         bool iswide()
         {
             bool isitwide = true;
-            for (int i = 0; i < listArch.Items.Count - 2; i++)
+            for (int i = 0; i < listArch.Items.Count - 1; i++)
             {
                 if ((int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text)) % 2048 != 0)
                 {
@@ -251,7 +248,7 @@ namespace PARC_Archive_Importer
             listArch.Enabled = false;
             listArch.Visible = false;
             int totaldifference = 0;
-            for (int i = 0; i < listArch.Items.Count - 2; i++)
+            for (int i = 0; i < listArch.Items.Count - 1; i++)
             {
                 int originalfilesize = int.Parse(listArch.Items[i + 1].SubItems[2].Text) - int.Parse(listArch.Items[i].SubItems[2].Text);
                 if (originalfilesize % 2048 != 0)
@@ -334,14 +331,11 @@ namespace PARC_Archive_Importer
                         }
 
                     }
-                    else if (m == listViewdebug.Items.Count - 1)
+                    else
                     {
-                        
-                        byte[] zeroes = new byte[(int.Parse(listArch.Items[m].SubItems[3].Text) / 2048 + 1) * 2048 - int.Parse(listArch.Items[m].SubItems[3].Text)];
+                        byte[] zeroes = new byte[(int.Parse(listArch.Items[m].SubItems[4].Text) / 2048 + 1) * 2048 - int.Parse(listArch.Items[m].SubItems[4].Text)];
                         fcreate.Write(zeroes, 0, zeroes.Length);
                     }
-
-
                 }
 
                 fcreate.Flush();
@@ -500,5 +494,6 @@ namespace PARC_Archive_Importer
             listArch.Visible = true;
 
         }
+
     }
 }
