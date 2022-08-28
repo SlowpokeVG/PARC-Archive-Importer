@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.buttonInportFiles = new System.Windows.Forms.Button();
+            this.buttonImportFiles = new System.Windows.Forms.Button();
             this.buttonOpenArch = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.buttonWiden = new System.Windows.Forms.Button();
@@ -51,7 +51,7 @@
             this.Isinarch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.listViewdebug = new System.Windows.Forms.ListView();
+            this.listViewOriginalReference = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -62,15 +62,15 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
-            // buttonInportFiles
+            // buttonImportFiles
             // 
-            this.buttonInportFiles.Location = new System.Drawing.Point(680, 462);
-            this.buttonInportFiles.Name = "buttonInportFiles";
-            this.buttonInportFiles.Size = new System.Drawing.Size(75, 23);
-            this.buttonInportFiles.TabIndex = 2;
-            this.buttonInportFiles.Text = "Open Files";
-            this.buttonInportFiles.UseVisualStyleBackColor = true;
-            this.buttonInportFiles.Click += new System.EventHandler(this.buttonInportFiles_Click);
+            this.buttonImportFiles.Location = new System.Drawing.Point(680, 462);
+            this.buttonImportFiles.Name = "buttonImportFiles";
+            this.buttonImportFiles.Size = new System.Drawing.Size(75, 23);
+            this.buttonImportFiles.TabIndex = 2;
+            this.buttonImportFiles.Text = "Open Files";
+            this.buttonImportFiles.UseVisualStyleBackColor = true;
+            this.buttonImportFiles.Click += new System.EventHandler(this.buttonImportFiles_Click);
             // 
             // buttonOpenArch
             // 
@@ -124,6 +124,7 @@
             this.IsCompressed,
             this.ID,
             this.folder});
+            this.listArch.HideSelection = false;
             this.listArch.Location = new System.Drawing.Point(13, 12);
             this.listArch.Name = "listArch";
             this.listArch.Size = new System.Drawing.Size(661, 444);
@@ -187,6 +188,7 @@
             this.Isinarch,
             this.columnHeader9,
             this.columnHeader10});
+            this.listImport.HideSelection = false;
             this.listImport.Location = new System.Drawing.Point(680, 12);
             this.listImport.Name = "listImport";
             this.listImport.Size = new System.Drawing.Size(479, 444);
@@ -231,9 +233,9 @@
             // 
             this.columnHeader10.Text = "";
             // 
-            // listViewdebug
+            // listViewOriginalReference
             // 
-            this.listViewdebug.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.listViewOriginalReference.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3,
@@ -242,14 +244,15 @@
             this.columnHeader6,
             this.columnHeader7,
             this.columnHeader8});
-            this.listViewdebug.Enabled = false;
-            this.listViewdebug.Location = new System.Drawing.Point(13, 12);
-            this.listViewdebug.Name = "listViewdebug";
-            this.listViewdebug.Size = new System.Drawing.Size(483, 444);
-            this.listViewdebug.TabIndex = 12;
-            this.listViewdebug.UseCompatibleStateImageBehavior = false;
-            this.listViewdebug.View = System.Windows.Forms.View.Details;
-            this.listViewdebug.Visible = false;
+            this.listViewOriginalReference.Enabled = false;
+            this.listViewOriginalReference.HideSelection = false;
+            this.listViewOriginalReference.Location = new System.Drawing.Point(13, 12);
+            this.listViewOriginalReference.Name = "listViewOriginalReference";
+            this.listViewOriginalReference.Size = new System.Drawing.Size(483, 444);
+            this.listViewOriginalReference.TabIndex = 12;
+            this.listViewOriginalReference.UseCompatibleStateImageBehavior = false;
+            this.listViewOriginalReference.View = System.Windows.Forms.View.Details;
+            this.listViewOriginalReference.Visible = false;
             // 
             // columnHeader1
             // 
@@ -302,14 +305,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1171, 496);
-            this.Controls.Add(this.listViewdebug);
+            this.Controls.Add(this.listViewOriginalReference);
             this.Controls.Add(this.listImport);
             this.Controls.Add(this.listArch);
             this.Controls.Add(this.buttonInject);
             this.Controls.Add(this.buttonWiden);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonOpenArch);
-            this.Controls.Add(this.buttonInportFiles);
+            this.Controls.Add(this.buttonImportFiles);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "PARC Archive Importer";
@@ -318,7 +321,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button buttonInportFiles;
+        private System.Windows.Forms.Button buttonImportFiles;
         private System.Windows.Forms.Button buttonOpenArch;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Button buttonWiden;
@@ -338,7 +341,7 @@
         private System.Windows.Forms.ColumnHeader IDinArch;
         private System.Windows.Forms.ColumnHeader Isinarch;
         private System.Windows.Forms.ColumnHeader folder;
-        private System.Windows.Forms.ListView listViewdebug;
+        private System.Windows.Forms.ListView listViewOriginalReference;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;

@@ -21,6 +21,36 @@ namespace PARC_Archive_Importer
             ZeroesToAdd = zeroestoadd;
         }
     }
+
+    public static class Extensions
+    {
+        public static T[] SubArray<T>(this T[] array, int offset, int length)
+        {
+            T[] result = new T[length];
+            Array.Copy(array, offset, result, 0, length);
+            return result;
+        }
+
+        public static int ReadInt32LE(byte[] ByteArray, int Offset)
+        {
+            byte[] ValueBytes = ByteArray.SubArray(Offset, 4);
+            Array.Reverse(ValueBytes);
+            return BitConverter.ToInt32(ValueBytes, 0);
+        }
+
+        public static void SetListItem(ListView TargetListView, int Row, int Column, int Value)
+        {
+            ListViewItem.ListViewSubItem item = TargetListView.Items[Row].SubItems[Column];
+            item.Tag = Value;
+            item.Text = Value.ToString();
+        }
+
+        public static int GetListItem(ListView TargetListView, int Row, int Column)
+        {
+            return (int) TargetListView.Items[Row].SubItems[Column].Tag;
+        }
+    }
+
     static class Program
     {
         /// <summary>
