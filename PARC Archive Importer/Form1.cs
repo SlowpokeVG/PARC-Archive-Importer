@@ -83,7 +83,12 @@ namespace PARC_Archive_Importer
                 int FileSizeOffset = Extensions.ReadInt32LE(OrigArchive, 4 + FileDescriptionOffset);
                 int FileSizeCompressedOffset = Extensions.ReadInt32LE(OrigArchive, 8 + FileDescriptionOffset);
                 string IsCompressed = "No";
-                if (OrigArchive[FileDescriptionOffset] != 0x00) IsCompressed = "Yes";
+                int CompressionVersion = 0;
+                if (OrigArchive[FileDescriptionOffset] != 0x00)
+                {
+                    CompressionVersion = OrigArchive[FileStart + 5];
+                    IsCompressed = $"Yes: {CompressionVersion}";
+                }
 
                 ListViewItem item = new ListViewItem();
                 item.Text = NameOfFile;
@@ -92,6 +97,7 @@ namespace PARC_Archive_Importer
                 item.SubItems.Add("");
                 item.SubItems.Add("");
                 item.SubItems.Add(IsCompressed);
+                item.SubItems[5].Tag = CompressionVersion;
                 item.SubItems.Add("");
                 item.SubItems.Add(FolderNames[i]);
                 listArch.Items.Add(item);
@@ -212,7 +218,7 @@ namespace PARC_Archive_Importer
             {
                 int FileDescriptionOffset = Extensions.GetListItem(list, i, 1);
 
-                InterOpenedArchive[FileDescriptionOffset] = (byte)(list.Items[i].SubItems[5].Text == "Yes" ? 0x80 : 0x00);
+                InterOpenedArchive[FileDescriptionOffset] = (byte)(Extensions.GetListItem(list, i, 5) > 0 ? 0x80 : 0x00);
                 WriteInt32(Extensions.GetListItem(list, i, 3), Archive, 4 + FileDescriptionOffset);
                 WriteInt32(Extensions.GetListItem(list, i, 4), Archive, 8 + FileDescriptionOffset);
                 WriteInt32(Extensions.GetListItem(list, i, 2), Archive, 12 + FileDescriptionOffset);
@@ -294,10 +300,6 @@ namespace PARC_Archive_Importer
 
                 fcreate.Flush();
                 fcreate.Close();
-
-                // Because InterOpenedArchive has been left unchanged,
-                // a revert and save of the original file is still possible.
-                // So we won't update listArchOriginalReference either.
 
                 Enabled = true;
                 Cursor = Cursors.Default;
@@ -418,10 +420,10 @@ namespace PARC_Archive_Importer
                     }
                 }
 
-                EliminateDuplicateImports();
 
                 if (listImport.Items.Count > 0)
                 {
+                    EliminateDuplicateImports();
                     CompressImports();
 
                     buttonClear.Enabled = true;
@@ -571,11 +573,15 @@ namespace PARC_Archive_Importer
                 {
                     int i = (int)ImportedItem.SubItems[3].Tag - 1;
 
-                    if (CompressionOption != 2)
-                        listArch.Items[i].SubItems[5].Text = CompressionOption == 1 ? "Yes" : "No";
+                    if (CompressionOption == 2)
+                        listArch.Items[i].SubItems[5].Tag = Extensions.GetListItem(listArchOriginalReference, i, 5);
+                    else
+                        listArch.Items[i].SubItems[5].Tag = injectionMode;
+                    listArch.Items[i].SubItems[5].Text = Extensions.GetListItem(listArch, i, 5) == 0
+                                                         ? "No" : $"Yes: {Extensions.GetListItem(listArch, i, 5)}";
+
                     Extensions.SetListItem(listArch, i, 3, (int)ImportedItem.SubItems[6].Tag, radioButtonHex.Checked);
-                    Extensions.SetListItem(listArch, i, 4,
-                        (int)ImportedItem.SubItems[listArch.Items[i].SubItems[5].Text == "Yes" ? 7 : 6].Tag, radioButtonHex.Checked);
+                    Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[7].Tag, radioButtonHex.Checked);
 
                     ImportedItem.SubItems[8].Text = "Yes";
                     ImportedItem.SubItems[8].Tag = injectionMode;
@@ -623,20 +629,23 @@ namespace PARC_Archive_Importer
                         {
                             Cursor = Cursors.WaitCursor;
 
-                            bool diff = false;
+                            bool listArchChanged = false;
                             if (currentVer != (radioButtonCompVer1.Checked ? 1 : 2))
                                 foreach (ListViewItem item in listImport.Items)
                                     if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
-                                        if ((int)item.SubItems[8].Tag != 0)
+                                    {
+                                        int i = (int)item.SubItems[3].Tag - 1;
+                                        if (Extensions.GetListItem(listArch, i, 5) != 0)
                                         {
                                             item.SubItems[8].Text = "No";
                                             item.SubItems[8].Tag = null;
 
-                                            revertListArchItemAt((int)item.SubItems[3].Tag - 1);
-                                            diff = true;
+                                            revertListArchItemAt(i);
+                                            listArchChanged = true;
                                         }
+                                    }
 
-                            if (diff) UpdateFileStarts();
+                            if (listArchChanged) UpdateFileStarts();
 
                             CompressionOption = comboBoxCompression.SelectedIndex;
 
@@ -661,6 +670,7 @@ namespace PARC_Archive_Importer
             Extensions.SetListItem(listArch, i, 3, (int)orig.SubItems[3].Tag, radioButtonHex.Checked);
             Extensions.SetListItem(listArch, i, 4, (int)orig.SubItems[4].Tag, radioButtonHex.Checked);
             listArch.Items[i].SubItems[5].Text = orig.SubItems[5].Text;
+            listArch.Items[i].SubItems[5].Tag = orig.SubItems[5].Tag;
         }
 
         private void buttonClear_Click(object sender, EventArgs e)
@@ -678,15 +688,15 @@ namespace PARC_Archive_Importer
                 listImport.Enabled = false;
                 listImport.Visible = false;
 
-                bool diff = false;
+                bool listArchChanged = false;
                 foreach (ListViewItem item in listImport.Items)
                     if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
                     {
                         revertListArchItemAt((int)item.SubItems[3].Tag - 1);
-                        diff = true;
+                        listArchChanged = true;
                     }
 
-                if (diff)
+                if (listArchChanged)
                 {
                     UpdateFileStarts();
 
@@ -813,27 +823,23 @@ namespace PARC_Archive_Importer
                         listImport.Enabled = false;
                         listArch.Enabled = false;
 
+                        bool listArchChanged = false;
                         foreach (ListViewItem item in listImport.Items)
-                        {
-                            if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text == "Yes")
+                            if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
                             {
                                 int i = (int)item.SubItems[3].Tag - 1;
 
-                                if (listArch.Items[i].SubItems[5].Text == "Yes")
+                                if (Extensions.GetListItem(listArch, i, 5) != 0)
                                 {
-                                    Extensions.SetListItem(listArch, i, 3,
-                                        (int)listArchOriginalReference.Items[i].SubItems[3].Tag, radioButtonHex.Checked);
-                                    Extensions.SetListItem(listArch, i, 4,
-                                        (int)listArchOriginalReference.Items[i].SubItems[4].Tag, radioButtonHex.Checked);
-                                    listArch.Items[i].SubItems[5].Text = listArchOriginalReference.Items[i].SubItems[5].Text;
-
                                     item.SubItems[8].Text = "No";
                                     item.SubItems[8].Tag = null;
+
+                                    revertListArchItemAt(i);
+                                    listArchChanged = true;
                                 }
                             }
-                        }
 
-                        UpdateFileStarts();
+                        if (listArchChanged) UpdateFileStarts();
 
                         CompressImports();
 
