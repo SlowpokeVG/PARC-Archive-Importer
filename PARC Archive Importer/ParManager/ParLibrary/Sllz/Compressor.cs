@@ -98,7 +98,7 @@ namespace ParLibrary.Sllz
             BitConverter.GetBytes(inputData.Length).CopyTo(outputData, 8);
             BitConverter.GetBytes(compressedData.Length + 0x10).CopyTo(outputData, 12); // data + header
 
-            if (Endianness == 1)
+            if (Endianness == 0)
             {
                 Array.Reverse(outputData, 6, 2);
                 Array.Reverse(outputData, 8, 4);
