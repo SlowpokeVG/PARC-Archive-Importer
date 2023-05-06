@@ -180,6 +180,9 @@ namespace PARC_Archive_Importer
 
                 WideFile = IsWide(listArchOriginalReference);
 
+                buttonWiden.Enabled = !WideFile;
+                if (WideFile) buttonWiden.Text = "Wide";
+
                 buttonImportFiles.Enabled = true;
                 comboBoxCompression.Enabled = true;
                 groupBoxCompressionVersion.Enabled = true;
