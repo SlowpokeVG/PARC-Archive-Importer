@@ -444,7 +444,6 @@
             radioButtonCompVer2.TabIndex = 1;
             radioButtonCompVer2.Text = "2";
             radioButtonCompVer2.UseVisualStyleBackColor = true;
-            radioButtonCompVer2.CheckedChanged += radioButtonCompVer2_CheckedChanged;
             // 
             // radioButtonCompVer1
             // 

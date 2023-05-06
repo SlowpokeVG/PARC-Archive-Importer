@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ParLibrary.Sllz;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using ParLibrary.Sllz;
 
 namespace PARC_Archive_Importer
 {
@@ -87,7 +88,7 @@ namespace PARC_Archive_Importer
                 if (OrigArchive[FileDescriptionOffset] != 0x00)
                 {
                     CompressionVersion = OrigArchive[FileStart + 5];
-                    IsCompressed = $"Yes: {CompressionVersion}";
+                    IsCompressed = $"Yes  (v{CompressionVersion})";
                 }
 
                 ListViewItem item = new ListViewItem();
@@ -180,6 +181,9 @@ namespace PARC_Archive_Importer
 
                 WideFile = IsWide(listArchOriginalReference);
 
+                buttonWiden.Enabled = !WideFile;
+                if (WideFile) buttonWiden.Text = "Wide";
+
                 buttonImportFiles.Enabled = true;
                 comboBoxCompression.Enabled = true;
                 groupBoxCompressionVersion.Enabled = true;
@@ -244,6 +248,7 @@ namespace PARC_Archive_Importer
             {
                 Cursor = Cursors.WaitCursor;
                 Enabled = false;
+                Refresh();
 
                 byte[] ArchiveCopy = new byte[InterOpenedArchive.Length];
                 InterOpenedArchive.CopyTo(ArchiveCopy, 0);
@@ -332,12 +337,6 @@ namespace PARC_Archive_Importer
                     }
                 }
 
-                if (CompressedFiles == null && CompressionOption > 0 && !checkBoxMuteWarnings.Checked
-                 && MessageBox.Show("Import files will be compressed if necessary.\nIt may take a moment.",
-                                    "Note", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-                    return;
-
-
                 Cursor = Cursors.WaitCursor;
                 listImport.Enabled = false;
                 listImport.Visible = false;
@@ -365,7 +364,7 @@ namespace PARC_Archive_Importer
                         ImportedItem.SubItems.Add(InjectFile);
                         ImportedItem.SubItems.Add(Convert.ToString(length, radioButtonHex.Checked ? 16 : 10));
                         ImportedItem.SubItems[6].Tag = length;
-                        ImportedItem.SubItems.Add(ImportedItem.SubItems[6].Text);
+                        ImportedItem.SubItems.Add("--");
                         ImportedItem.SubItems[7].Tag = length;
                         ImportedItem.SubItems.Add("No");
                         listImport.Items.Add(ImportedItem);
@@ -398,7 +397,7 @@ namespace PARC_Archive_Importer
                                     ImportedItem.SubItems.Add(InjectFile);
                                     ImportedItem.SubItems.Add(Convert.ToString(length, radioButtonHex.Checked ? 16 : 10));
                                     ImportedItem.SubItems[6].Tag = length;
-                                    ImportedItem.SubItems.Add(ImportedItem.SubItems[6].Text);
+                                    ImportedItem.SubItems.Add("--");
                                     ImportedItem.SubItems[7].Tag = length;
                                     ImportedItem.SubItems.Add("No");
                                     listImport.Items.Add(ImportedItem);
@@ -424,7 +423,6 @@ namespace PARC_Archive_Importer
                 if (listImport.Items.Count > 0)
                 {
                     EliminateDuplicateImports();
-                    CompressImports();
 
                     buttonClear.Enabled = true;
                     buttonInject.Enabled = true;
@@ -479,60 +477,58 @@ namespace PARC_Archive_Importer
 
         private int getVersionOfCompressedFiles()
         {
+            int version = 0;
+
             if (CompressedFiles != null && CompressedFiles.Length > 0)
                 for (int n = 0; n < CompressedFiles.Length; n++)
                     if (CompressedFiles[n] != null && CompressedFiles[n].Length > 0)
-                        return CompressedFiles[n][5];
+                    {
+                        version = CompressedFiles[n][5];
+                        break;
+                    }
 
-            return -1;
+            return version;
         }
 
         private void CompressImports()
         {
-            Compressor comp = null;
+            if (CompressedFiles == null)
+                CompressedFiles = new byte[listImport.Items.Count][];
+            else if (CompressedFiles.Length < listImport.Items.Count)
+            {
+                byte[][] tempArray = new byte[listImport.Items.Count][];
+                CompressedFiles.CopyTo(tempArray, 0);
+                CompressedFiles = tempArray;
+            }
+
             if (CompressionOption > 0)
             {
                 int version = radioButtonCompVer1.Checked ? 1 : 2;
-                comp = new Compressor(version, 1);
+                Compressor comp = new Compressor(version, 0);
 
-                if (getVersionOfCompressedFiles() != version)
-                    CompressedFiles = new byte[listImport.Items.Count][];
-
-                else if (CompressedFiles.Length < listImport.Items.Count)
-                {
-                    byte[][] tempArray = new byte[listImport.Items.Count][];
-                    CompressedFiles.CopyTo(tempArray, 0);
-                    CompressedFiles = tempArray;
-                }
-            }
-
-            for (int n = 0; n < listImport.Items.Count; n++)
-            {
-                ListViewItem ImportedItem = listImport.Items[n];
-
-                if (ImportedItem.SubItems[4].Text == "Yes")
-                {
-                    if (CompressionOption == 0)
-                        ImportedItem.SubItems[7].Tag = ImportedItem.SubItems[6].Tag;
-
-                    else
+                foreach (ListViewItem ImportedItem in listImport.Items)
+                    if (ImportedItem.SubItems[4].Text == "Yes")
                     {
-                        if (CompressedFiles[n] == null || CompressedFiles[n].Length == 0)
+                        int n = ImportedItem.Index;
+
+                        if (CompressionOption == 1
+                         || Extensions.GetListItem(listArchOriginalReference, (int)ImportedItem.SubItems[3].Tag - 1, 5) > 0)
                         {
-                            FileStream import = File.Open(ImportedItem.SubItems[5].Text, FileMode.Open);
-                            CompressedFiles[n] = new byte[import.Length];
-                            import.Read(CompressedFiles[n], 0, (int)import.Length);
-                            import.Flush();
-                            import.Close();
+                            if (CompressedFiles[n] == null || CompressedFiles[n].Length == 0
+                             || CompressedFiles[n][5] != version)
+                            {
+                                FileStream import = File.Open(ImportedItem.SubItems[5].Text, FileMode.Open);
+                                CompressedFiles[n] = new byte[import.Length];
+                                import.Read(CompressedFiles[n], 0, (int)import.Length);
+                                import.Flush();
+                                import.Close();
 
-                            CompressedFiles[n] = comp.Convert(CompressedFiles[n]);
+                                CompressedFiles[n] = comp.Convert(CompressedFiles[n]);
+                            }
+
+                            Extensions.SetListItem(listImport, n, 7, CompressedFiles[n].Length, radioButtonHex.Checked);
                         }
-
-                        ImportedItem.SubItems[7].Tag = (int)CompressedFiles[n].Length;
                     }
-
-                    ImportedItem.SubItems[7].Text = Convert.ToString((int)ImportedItem.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
-                }
             }
         }
 
@@ -558,109 +554,64 @@ namespace PARC_Archive_Importer
         private void buttonInject_Click(object sender, EventArgs e)
         {
             Enabled = false;
-            Cursor = Cursors.WaitCursor;
-            Refresh();
 
-            bool diff = false;
-            int injectionMode = CompressionOption == 2 ? -1 :
-                                    CompressionOption == 0 ? 0 :
-                                        radioButtonCompVer1.Checked ? 1 : 2;
-            uint compIndex = 0;
-            foreach (ListViewItem ImportedItem in listImport.Items)
+            if (CompressionOption == 0 || checkBoxMuteWarnings.Checked
+             || MessageBox.Show("Files must be compressed before injection."
+             + "\nIf necessary, the process may take some time. Continue?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                if (ImportedItem.SubItems[4].Text == "Yes"
-                && (ImportedItem.SubItems[8].Text == "No" || (int)ImportedItem.SubItems[8].Tag != injectionMode))
+                Cursor = Cursors.WaitCursor;
+
+                CompressImports();
+
+                //int version = getVersionOfCompressedFiles();
+
+                bool diff = false;
+                foreach (ListViewItem ImportedItem in listImport.Items)
                 {
-                    int i = (int)ImportedItem.SubItems[3].Tag - 1;
+                    if (ImportedItem.SubItems[4].Text == "Yes")
+                    {
+                        int version = 0;
+                        if (CompressionOption != 0
+                         && CompressedFiles[ImportedItem.Index] != null
+                         && CompressedFiles[ImportedItem.Index].Length > 0)
+                            version = CompressedFiles[ImportedItem.Index][5];
 
-                    if (CompressionOption == 2)
-                        listArch.Items[i].SubItems[5].Tag = Extensions.GetListItem(listArchOriginalReference, i, 5);
-                    else
-                        listArch.Items[i].SubItems[5].Tag = injectionMode;
-                    listArch.Items[i].SubItems[5].Text = Extensions.GetListItem(listArch, i, 5) == 0
-                                                         ? "No" : $"Yes: {Extensions.GetListItem(listArch, i, 5)}";
+                        if (ImportedItem.SubItems[8].Text == "No" || (int)ImportedItem.SubItems[8].Tag != version)
+                        {
+                            int i = (int)ImportedItem.SubItems[3].Tag - 1;
 
-                    Extensions.SetListItem(listArch, i, 3, (int)ImportedItem.SubItems[6].Tag, radioButtonHex.Checked);
-                    Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[7].Tag, radioButtonHex.Checked);
+                            listArch.Items[i].SubItems[5].Text = version == 0 ? "No" : $"Yes  (v{version})";
+                            listArch.Items[i].SubItems[5].Tag = version;
 
-                    ImportedItem.SubItems[8].Text = "Yes";
-                    ImportedItem.SubItems[8].Tag = injectionMode;
+                            Extensions.SetListItem(listArch, i, 3, (int)ImportedItem.SubItems[6].Tag, radioButtonHex.Checked);
+                            Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[version == 0 ? 6 : 7].Tag, radioButtonHex.Checked);
 
-                    diff = true;
+                            ImportedItem.SubItems[8].Text = "Yes" + (version == 0 ? "" : $"  (v{version})");
+                            ImportedItem.SubItems[8].Tag = version;
+
+                            diff = true;
+                        }
+                    }
                 }
 
-                compIndex++;
+                if (diff)
+                {
+                    UpdateFileStarts();
+                    buttonRevert.Enabled = true;
+                }
+
+                listArch.Update();
+                listImport.Update();
+
+                Cursor = Cursors.Default;
             }
 
-            if (diff)
-            {
-                UpdateFileStarts();
-                buttonRevert.Enabled = true;
-            }
-
-            Cursor = Cursors.Default;
             Enabled = true;
         }
 
         private void comboBoxCompression_Commit(object sender, EventArgs e)
         {
-            if (comboBoxCompression.SelectedIndex != CompressionOption)
-            {
-                if (listImport.Items.Count > 0 && comboBoxCompression.SelectedIndex > 0)
-                {
-                    Enabled = false;
-
-                    if (CompressionOption == 0 && !checkBoxMuteWarnings.Checked
-                     && MessageBox.Show("Import files will be compressed if necessary.\nIt may take a moment.",
-                                        "Note", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-                        comboBoxCompression.SelectedIndex = CompressionOption;
-
-                    else
-                    {
-                        int currentVer = getVersionOfCompressedFiles();
-
-                        if (currentVer != (radioButtonCompVer1.Checked ? 1 : 2) && currentVer != -1
-                         && !checkBoxMuteWarnings.Checked
-                         && MessageBox.Show("All compressed injected files will have to be manually injected again."
-                                          + "\nContinue anyway?", "Warning", MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-                            comboBoxCompression.SelectedIndex = CompressionOption;
-
-                        else
-                        {
-                            Cursor = Cursors.WaitCursor;
-
-                            bool listArchChanged = false;
-                            if (currentVer != (radioButtonCompVer1.Checked ? 1 : 2))
-                                foreach (ListViewItem item in listImport.Items)
-                                    if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
-                                    {
-                                        int i = (int)item.SubItems[3].Tag - 1;
-                                        if (Extensions.GetListItem(listArch, i, 5) != 0)
-                                        {
-                                            item.SubItems[8].Text = "No";
-                                            item.SubItems[8].Tag = null;
-
-                                            revertListArchItemAt(i);
-                                            listArchChanged = true;
-                                        }
-                                    }
-
-                            if (listArchChanged) UpdateFileStarts();
-
-                            CompressionOption = comboBoxCompression.SelectedIndex;
-
-                            CompressImports();
-
-                            Cursor = Cursors.Default;
-                        }
-                    }
-
-                    Enabled = true;
-                }
-                else
-                    CompressionOption = comboBoxCompression.SelectedIndex;
-
-            }
+            CompressionOption = comboBoxCompression.SelectedIndex;
         }
 
         private void revertListArchItemAt(int i)
@@ -793,75 +744,13 @@ namespace PARC_Archive_Importer
                 item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
                 item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
                 item.SubItems[6].Text = Convert.ToString((int)item.SubItems[6].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[7].Text = Convert.ToString((int)item.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
+                if (item.SubItems[7].Text != "--")
+                    item.SubItems[7].Text = Convert.ToString((int)item.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
             }
 
             Cursor = Cursors.Default;
 
             Enabled = true;
-        }
-
-        private bool RecursiveEventHelper = false;
-        private void radioButtonCompVer2_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!RecursiveEventHelper)
-            {
-                int currentVer = getVersionOfCompressedFiles();
-
-                if (listImport.Items.Count > 0 && CompressionOption > 0
-                 && currentVer != (radioButtonCompVer1.Checked ? 1 : 2))
-                {
-                    if (checkBoxMuteWarnings.Checked
-                     || MessageBox.Show($"The previous compression used SLLZ v{(!radioButtonCompVer1.Checked ? 1 : 2)}." +
-                                         "\nFiles that were injected compressed" +
-                                         "\nwill have to be manually injected again." +
-                                         "\nContinue anyway?",
-                                         "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                    {
-                        Cursor = Cursors.WaitCursor;
-
-                        listImport.Enabled = false;
-                        listArch.Enabled = false;
-
-                        bool listArchChanged = false;
-                        foreach (ListViewItem item in listImport.Items)
-                            if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
-                            {
-                                int i = (int)item.SubItems[3].Tag - 1;
-
-                                if (Extensions.GetListItem(listArch, i, 5) != 0)
-                                {
-                                    item.SubItems[8].Text = "No";
-                                    item.SubItems[8].Tag = null;
-
-                                    revertListArchItemAt(i);
-                                    listArchChanged = true;
-                                }
-                            }
-
-                        if (listArchChanged) UpdateFileStarts();
-
-                        CompressImports();
-
-                        listArch.Update();
-                        listImport.Update();
-                        listArch.Enabled = true;
-                        listImport.Enabled = true;
-
-                        Cursor = Cursors.Default;
-                    }
-                    else
-                    {
-                        RecursiveEventHelper = true;
-                        if (radioButtonCompVer1.Checked)
-                            radioButtonCompVer2.Checked = true;
-                        else
-                            radioButtonCompVer1.Checked = true;
-                    }
-                }
-            }
-            else
-                RecursiveEventHelper = false;
         }
 
         private void Form1_Resize(object sender, EventArgs e)
