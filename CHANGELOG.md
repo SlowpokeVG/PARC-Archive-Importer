@@ -1,5 +1,25 @@
 # Changelog
 
+## [Delay Compression] - 2023-05-07
+
+### Added
+- An Auto mode for compression version. Only works with Mirror PAR File.
+- A progress bar to show how compression / injection is going.
+
+### Changed
+- Compression is now delayed until injection. This solves several problems,
+  eliminates tricky edge cases that would be confusing for a user anyway,
+  and makes the code cleaner as well.
+- The Compressed Size column of the import list will no longer display
+  any size until a compressed version of that file has been injected,
+  since that's the one time when compression takes place. I don't think
+  this is a problem in the majority of use cases, and if a file is injected
+  compressed and then reverted, the compressed file will still exist in memory,
+  meaning the size will still be displayed.
+- SLLZ Version options are now enabled and disabled at appropriate times.
+- Auto + Mirror PAR File is now the default option, rather than Uncompressed.
+
+
 ## ["Knock It Outta The PARC" Edition] - 2023-05-05
 
 ### Added
