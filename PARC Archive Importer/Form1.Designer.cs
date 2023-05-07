@@ -75,6 +75,7 @@
             radioButtonCompVer2 = new System.Windows.Forms.RadioButton();
             radioButtonCompVer1 = new System.Windows.Forms.RadioButton();
             checkBoxPadLast = new System.Windows.Forms.CheckBox();
+            progressBarInject = new System.Windows.Forms.ProgressBar();
             contextMenuRightClick.SuspendLayout();
             groupBoxCompressionVersion.SuspendLayout();
             SuspendLayout();
@@ -471,12 +472,25 @@
             checkBoxPadLast.Text = "Pad Last File";
             checkBoxPadLast.UseVisualStyleBackColor = true;
             // 
+            // progressBarInject
+            // 
+            progressBarInject.ForeColor = System.Drawing.Color.SlateBlue;
+            progressBarInject.Location = new System.Drawing.Point(1302, 859);
+            progressBarInject.Maximum = 30;
+            progressBarInject.Name = "progressBarInject";
+            progressBarInject.Size = new System.Drawing.Size(88, 23);
+            progressBarInject.Step = 1;
+            progressBarInject.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            progressBarInject.TabIndex = 21;
+            progressBarInject.Visible = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1498, 924);
             ContextMenuStrip = contextMenuRightClick;
+            Controls.Add(progressBarInject);
             Controls.Add(checkBoxPadLast);
             Controls.Add(groupBoxCompressionVersion);
             Controls.Add(radioButtonHex);
@@ -553,6 +567,7 @@
         private System.Windows.Forms.RadioButton radioButtonCompVer2;
         private System.Windows.Forms.RadioButton radioButtonCompVer1;
         private System.Windows.Forms.CheckBox checkBoxPadLast;
+        private System.Windows.Forms.ProgressBar progressBarInject;
     }
 }
 

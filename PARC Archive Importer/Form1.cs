@@ -507,6 +507,7 @@ namespace PARC_Archive_Importer
                 Compressor comp = new Compressor(version, 0);
 
                 foreach (ListViewItem ImportedItem in listImport.Items)
+                {
                     if (ImportedItem.SubItems[4].Text == "Yes")
                     {
                         int n = ImportedItem.Index;
@@ -529,6 +530,10 @@ namespace PARC_Archive_Importer
                             Extensions.SetListItem(listImport, n, 7, CompressedFiles[n].Length, radioButtonHex.Checked);
                         }
                     }
+
+                    if (progressBarInject.Visible) progressBarInject.PerformStep();
+
+                }
             }
         }
 
@@ -561,9 +566,11 @@ namespace PARC_Archive_Importer
             {
                 Cursor = Cursors.WaitCursor;
 
-                CompressImports();
+                progressBarInject.Maximum = listImport.Items.Count + 2;
+                progressBarInject.Value = 0;
+                progressBarInject.Visible = true;
 
-                //int version = getVersionOfCompressedFiles();
+                CompressImports();
 
                 bool diff = false;
                 foreach (ListViewItem ImportedItem in listImport.Items)
@@ -594,11 +601,16 @@ namespace PARC_Archive_Importer
                     }
                 }
 
+                progressBarInject.PerformStep();
+
                 if (diff)
                 {
                     UpdateFileStarts();
                     buttonRevert.Enabled = true;
                 }
+
+                progressBarInject.PerformStep();
+                progressBarInject.Visible = false;
 
                 listArch.Update();
                 listImport.Update();
