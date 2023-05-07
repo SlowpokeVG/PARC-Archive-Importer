@@ -475,10 +475,10 @@
             // progressBarInject
             // 
             progressBarInject.ForeColor = System.Drawing.Color.SlateBlue;
-            progressBarInject.Location = new System.Drawing.Point(1302, 859);
+            progressBarInject.Location = new System.Drawing.Point(1306, 888);
             progressBarInject.Maximum = 30;
             progressBarInject.Name = "progressBarInject";
-            progressBarInject.Size = new System.Drawing.Size(88, 23);
+            progressBarInject.Size = new System.Drawing.Size(80, 21);
             progressBarInject.Step = 1;
             progressBarInject.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             progressBarInject.TabIndex = 21;
