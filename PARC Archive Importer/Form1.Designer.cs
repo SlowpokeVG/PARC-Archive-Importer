@@ -72,9 +72,11 @@
             contextMenuRightClick = new System.Windows.Forms.ContextMenuStrip(components);
             toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             groupBoxCompressionVersion = new System.Windows.Forms.GroupBox();
+            radioButtonCompVerAuto = new System.Windows.Forms.RadioButton();
             radioButtonCompVer2 = new System.Windows.Forms.RadioButton();
             radioButtonCompVer1 = new System.Windows.Forms.RadioButton();
             checkBoxPadLast = new System.Windows.Forms.CheckBox();
+            progressBarInject = new System.Windows.Forms.ProgressBar();
             contextMenuRightClick.SuspendLayout();
             groupBoxCompressionVersion.SuspendLayout();
             SuspendLayout();
@@ -338,8 +340,8 @@
             comboBoxCompression.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             comboBoxCompression.Enabled = false;
             comboBoxCompression.FormattingEnabled = true;
-            comboBoxCompression.Items.AddRange(new object[] { "Uncompressed", "Compressed", "Mirror PAR File" });
-            comboBoxCompression.Location = new System.Drawing.Point(1154, 887);
+            comboBoxCompression.Items.AddRange(new object[] { "All Uncompressed", "All Compressed", "Mirror PAR File" });
+            comboBoxCompression.Location = new System.Drawing.Point(1154, 890);
             comboBoxCompression.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             comboBoxCompression.Name = "comboBoxCompression";
             comboBoxCompression.Size = new System.Drawing.Size(140, 23);
@@ -424,38 +426,51 @@
             // groupBoxCompressionVersion
             // 
             groupBoxCompressionVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxCompressionVersion.Controls.Add(radioButtonCompVerAuto);
             groupBoxCompressionVersion.Controls.Add(radioButtonCompVer2);
             groupBoxCompressionVersion.Controls.Add(radioButtonCompVer1);
             groupBoxCompressionVersion.Enabled = false;
-            groupBoxCompressionVersion.Location = new System.Drawing.Point(1154, 851);
+            groupBoxCompressionVersion.Location = new System.Drawing.Point(1154, 854);
             groupBoxCompressionVersion.Name = "groupBoxCompressionVersion";
             groupBoxCompressionVersion.Size = new System.Drawing.Size(140, 35);
             groupBoxCompressionVersion.TabIndex = 19;
             groupBoxCompressionVersion.TabStop = false;
             groupBoxCompressionVersion.Text = "SLLZ Version";
             // 
+            // radioButtonCompVerAuto
+            // 
+            radioButtonCompVerAuto.AutoSize = true;
+            radioButtonCompVerAuto.Checked = true;
+            radioButtonCompVerAuto.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVerAuto.Location = new System.Drawing.Point(93, 17);
+            radioButtonCompVerAuto.Name = "radioButtonCompVerAuto";
+            radioButtonCompVerAuto.Size = new System.Drawing.Size(44, 16);
+            radioButtonCompVerAuto.TabIndex = 2;
+            radioButtonCompVerAuto.TabStop = true;
+            radioButtonCompVerAuto.Text = "Auto";
+            radioButtonCompVerAuto.UseVisualStyleBackColor = true;
+            // 
             // radioButtonCompVer2
             // 
             radioButtonCompVer2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             radioButtonCompVer2.AutoSize = true;
-            radioButtonCompVer2.Location = new System.Drawing.Point(74, 14);
+            radioButtonCompVer2.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer2.Location = new System.Drawing.Point(42, 17);
             radioButtonCompVer2.Name = "radioButtonCompVer2";
-            radioButtonCompVer2.Size = new System.Drawing.Size(31, 19);
+            radioButtonCompVer2.Size = new System.Drawing.Size(28, 16);
             radioButtonCompVer2.TabIndex = 1;
             radioButtonCompVer2.Text = "2";
             radioButtonCompVer2.UseVisualStyleBackColor = true;
-            radioButtonCompVer2.CheckedChanged += radioButtonCompVer2_CheckedChanged;
             // 
             // radioButtonCompVer1
             // 
             radioButtonCompVer1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             radioButtonCompVer1.AutoSize = true;
-            radioButtonCompVer1.Checked = true;
-            radioButtonCompVer1.Location = new System.Drawing.Point(10, 14);
+            radioButtonCompVer1.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer1.Location = new System.Drawing.Point(7, 17);
             radioButtonCompVer1.Name = "radioButtonCompVer1";
-            radioButtonCompVer1.Size = new System.Drawing.Size(31, 19);
+            radioButtonCompVer1.Size = new System.Drawing.Size(28, 16);
             radioButtonCompVer1.TabIndex = 0;
-            radioButtonCompVer1.TabStop = true;
             radioButtonCompVer1.Text = "1";
             radioButtonCompVer1.UseVisualStyleBackColor = true;
             // 
@@ -465,12 +480,25 @@
             checkBoxPadLast.AutoSize = true;
             checkBoxPadLast.Checked = true;
             checkBoxPadLast.CheckState = System.Windows.Forms.CheckState.Checked;
-            checkBoxPadLast.Location = new System.Drawing.Point(1397, 859);
+            checkBoxPadLast.Location = new System.Drawing.Point(1396, 859);
             checkBoxPadLast.Name = "checkBoxPadLast";
             checkBoxPadLast.Size = new System.Drawing.Size(91, 19);
             checkBoxPadLast.TabIndex = 20;
             checkBoxPadLast.Text = "Pad Last File";
             checkBoxPadLast.UseVisualStyleBackColor = true;
+            // 
+            // progressBarInject
+            // 
+            progressBarInject.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            progressBarInject.ForeColor = System.Drawing.Color.SlateBlue;
+            progressBarInject.Location = new System.Drawing.Point(1306, 888);
+            progressBarInject.Maximum = 30;
+            progressBarInject.Name = "progressBarInject";
+            progressBarInject.Size = new System.Drawing.Size(80, 21);
+            progressBarInject.Step = 1;
+            progressBarInject.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            progressBarInject.TabIndex = 21;
+            progressBarInject.Visible = false;
             // 
             // Form1
             // 
@@ -478,6 +506,7 @@
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1498, 924);
             ContextMenuStrip = contextMenuRightClick;
+            Controls.Add(progressBarInject);
             Controls.Add(checkBoxPadLast);
             Controls.Add(groupBoxCompressionVersion);
             Controls.Add(radioButtonHex);
@@ -554,6 +583,8 @@
         private System.Windows.Forms.RadioButton radioButtonCompVer2;
         private System.Windows.Forms.RadioButton radioButtonCompVer1;
         private System.Windows.Forms.CheckBox checkBoxPadLast;
+        private System.Windows.Forms.ProgressBar progressBarInject;
+        private System.Windows.Forms.RadioButton radioButtonCompVerAuto;
     }
 }
 
