@@ -261,9 +261,9 @@ namespace PARC_Archive_Importer
                 for (int m = 0; m < listArch.Items.Count; m++)
                 {
                     bool IsImported = false;
-
+                    
                     for (int n = 0; n < listImport.Items.Count; n++)
-                        if (listImport.Items[n].SubItems[4].Text == "Yes" && listImport.Items[n].SubItems[8].Text == "Yes")
+                        if (listImport.Items[n].SubItems[4].Text == "Yes" && listImport.Items[n].SubItems[8].Text != "No")
                             if (Extensions.GetListItem(listImport, n, 3) - 1 == m)
                             {
                                 if (listArch.Items[m].SubItems[5].Text == "No")
@@ -293,7 +293,6 @@ namespace PARC_Archive_Importer
                                                     - Extensions.GetListItem(listArch, m, 4)
                                                     - Extensions.GetListItem(listArch, m, 2)];
                             fcreate.Write(Padding, 0, Padding.Length);
-
                         }
                     }
                     else if (checkBoxPadLast.Checked)
