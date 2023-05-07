@@ -72,6 +72,7 @@
             contextMenuRightClick = new System.Windows.Forms.ContextMenuStrip(components);
             toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             groupBoxCompressionVersion = new System.Windows.Forms.GroupBox();
+            radioButtonCompVerAuto = new System.Windows.Forms.RadioButton();
             radioButtonCompVer2 = new System.Windows.Forms.RadioButton();
             radioButtonCompVer1 = new System.Windows.Forms.RadioButton();
             checkBoxPadLast = new System.Windows.Forms.CheckBox();
@@ -425,6 +426,7 @@
             // groupBoxCompressionVersion
             // 
             groupBoxCompressionVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxCompressionVersion.Controls.Add(radioButtonCompVerAuto);
             groupBoxCompressionVersion.Controls.Add(radioButtonCompVer2);
             groupBoxCompressionVersion.Controls.Add(radioButtonCompVer1);
             groupBoxCompressionVersion.Enabled = false;
@@ -435,13 +437,27 @@
             groupBoxCompressionVersion.TabStop = false;
             groupBoxCompressionVersion.Text = "SLLZ Version";
             // 
+            // radioButtonCompVerAuto
+            // 
+            radioButtonCompVerAuto.AutoSize = true;
+            radioButtonCompVerAuto.Enabled = false;
+            radioButtonCompVerAuto.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVerAuto.Location = new System.Drawing.Point(93, 17);
+            radioButtonCompVerAuto.Name = "radioButtonCompVerAuto";
+            radioButtonCompVerAuto.Size = new System.Drawing.Size(44, 16);
+            radioButtonCompVerAuto.TabIndex = 2;
+            radioButtonCompVerAuto.TabStop = true;
+            radioButtonCompVerAuto.Text = "Auto";
+            radioButtonCompVerAuto.UseVisualStyleBackColor = true;
+            // 
             // radioButtonCompVer2
             // 
             radioButtonCompVer2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             radioButtonCompVer2.AutoSize = true;
-            radioButtonCompVer2.Location = new System.Drawing.Point(74, 14);
+            radioButtonCompVer2.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer2.Location = new System.Drawing.Point(40, 17);
             radioButtonCompVer2.Name = "radioButtonCompVer2";
-            radioButtonCompVer2.Size = new System.Drawing.Size(31, 19);
+            radioButtonCompVer2.Size = new System.Drawing.Size(28, 16);
             radioButtonCompVer2.TabIndex = 1;
             radioButtonCompVer2.Text = "2";
             radioButtonCompVer2.UseVisualStyleBackColor = true;
@@ -451,9 +467,10 @@
             radioButtonCompVer1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             radioButtonCompVer1.AutoSize = true;
             radioButtonCompVer1.Checked = true;
-            radioButtonCompVer1.Location = new System.Drawing.Point(10, 14);
+            radioButtonCompVer1.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer1.Location = new System.Drawing.Point(10, 17);
             radioButtonCompVer1.Name = "radioButtonCompVer1";
-            radioButtonCompVer1.Size = new System.Drawing.Size(31, 19);
+            radioButtonCompVer1.Size = new System.Drawing.Size(28, 16);
             radioButtonCompVer1.TabIndex = 0;
             radioButtonCompVer1.TabStop = true;
             radioButtonCompVer1.Text = "1";
@@ -568,6 +585,7 @@
         private System.Windows.Forms.RadioButton radioButtonCompVer1;
         private System.Windows.Forms.CheckBox checkBoxPadLast;
         private System.Windows.Forms.ProgressBar progressBarInject;
+        private System.Windows.Forms.RadioButton radioButtonCompVerAuto;
     }
 }
 

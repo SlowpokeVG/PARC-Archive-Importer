@@ -186,7 +186,7 @@ namespace PARC_Archive_Importer
 
                 buttonImportFiles.Enabled = true;
                 comboBoxCompression.Enabled = true;
-                groupBoxCompressionVersion.Enabled = true;
+                compressionRadioButtonEnabler();
                 buttonSave.Enabled = true;
             }
             catch (IOException ex)
@@ -510,13 +510,17 @@ namespace PARC_Archive_Importer
                 {
                     if (ImportedItem.SubItems[4].Text == "Yes")
                     {
-                        int n = ImportedItem.Index;
+                        int origVersion = Extensions.GetListItem(listArchOriginalReference, (int)ImportedItem.SubItems[3].Tag - 1, 5);
 
-                        if (CompressionOption == 1
-                         || Extensions.GetListItem(listArchOriginalReference, (int)ImportedItem.SubItems[3].Tag - 1, 5) > 0)
+                        if (CompressionOption == 1 || CompressionOption == 2 && origVersion > 0)
                         {
+                            if (radioButtonCompVerAuto.Checked)
+                                comp = new Compressor(origVersion, 0);
+
+                            int n = ImportedItem.Index;
+
                             if (CompressedFiles[n] == null || CompressedFiles[n].Length == 0
-                             || CompressedFiles[n][5] != version)
+                             || CompressedFiles[n][5] != (CompressionOption == 1 ? version : origVersion))
                             {
                                 FileStream import = File.Open(ImportedItem.SubItems[5].Text, FileMode.Open);
                                 CompressedFiles[n] = new byte[import.Length];
@@ -532,9 +536,11 @@ namespace PARC_Archive_Importer
                     }
 
                     if (progressBarInject.Visible) progressBarInject.PerformStep();
-
                 }
             }
+
+            else if (progressBarInject.Visible)
+                progressBarInject.Increment(listImport.Items.Count);
         }
 
         private void UpdateFileStarts()
@@ -623,7 +629,23 @@ namespace PARC_Archive_Importer
 
         private void comboBoxCompression_Commit(object sender, EventArgs e)
         {
+            compressionRadioButtonEnabler();
+
             CompressionOption = comboBoxCompression.SelectedIndex;
+        }
+
+        private void compressionRadioButtonEnabler()
+        {
+            groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
+
+            if (comboBoxCompression.SelectedIndex == 2)
+                radioButtonCompVerAuto.Enabled = true;
+            else
+            {
+                if (CompressionOption == 2 && radioButtonCompVerAuto.Checked)
+                    radioButtonCompVer1.Checked = true;
+                radioButtonCompVerAuto.Enabled = false;
+            }
         }
 
         private void revertListArchItemAt(int i)
