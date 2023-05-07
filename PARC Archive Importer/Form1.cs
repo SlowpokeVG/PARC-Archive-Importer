@@ -440,12 +440,12 @@ namespace PARC_Archive_Importer
                 if (listImport.Items[n].SubItems[4].Text == "Yes")
                     for (int other = n + 1; other < listImport.Items.Count; other++)
                         if (listImport.Items[other].SubItems[4].Text == "Yes"
-                         && listImport.Items[n].SubItems[3].Tag == listImport.Items[other].SubItems[3].Tag) // Same ID
+                         && Extensions.GetListItem(listImport, n, 3) == Extensions.GetListItem(listImport, other, 3)) // Same ID
                         {
                             if (checkBoxMuteWarnings.Checked
                              // Assume same path import is an intentional re-import
                              || listImport.Items[n].SubItems[5].Text == listImport.Items[other].SubItems[5].Text
-                             || MessageBox.Show($"Import conflict at i {listImport.Items[n].SubItems[3].Tag}." +
+                             || MessageBox.Show($"Import conflict at i {Extensions.GetListItem(listImport, n, 3)}." +
                                                 $"\n\nDo you want to import \"{listImport.Items[other].SubItems[5].Text}\"" +
                                                 $"\ninstead of \"{listImport.Items[n].SubItems[5].Text}\"?",
                                                 "Warning", MessageBoxButtons.YesNo) == DialogResult.Yes)
