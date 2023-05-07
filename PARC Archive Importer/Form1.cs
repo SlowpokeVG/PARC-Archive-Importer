@@ -21,7 +21,7 @@ namespace PARC_Archive_Importer
         private string OpenedArchName;
         private string OpenedArchPath;
 
-        private int CompressionOption = 0;
+        private int CompressionOption = 2;
         private byte[][] CompressedFiles;
 
         private bool WideFile = false;
@@ -30,7 +30,7 @@ namespace PARC_Archive_Importer
         public Form1()
         {
             InitializeComponent();
-            comboBoxCompression.SelectedIndex = 0;
+            comboBoxCompression.SelectedIndex = 2;
         }
 
         public static void WriteInt32(int value, byte[] target, int address)
@@ -186,7 +186,7 @@ namespace PARC_Archive_Importer
 
                 buttonImportFiles.Enabled = true;
                 comboBoxCompression.Enabled = true;
-                compressionRadioButtonEnabler();
+                groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
                 buttonSave.Enabled = true;
             }
             catch (IOException ex)
@@ -629,22 +629,22 @@ namespace PARC_Archive_Importer
 
         private void comboBoxCompression_Commit(object sender, EventArgs e)
         {
-            compressionRadioButtonEnabler();
-
-            CompressionOption = comboBoxCompression.SelectedIndex;
-        }
-
-        private void compressionRadioButtonEnabler()
-        {
-            groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
-
-            if (comboBoxCompression.SelectedIndex == 2)
-                radioButtonCompVerAuto.Enabled = true;
-            else
+            if (comboBoxCompression.SelectedIndex != CompressionOption)
             {
-                if (CompressionOption == 2 && radioButtonCompVerAuto.Checked)
-                    radioButtonCompVer1.Checked = true;
-                radioButtonCompVerAuto.Enabled = false;
+                groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
+
+                if (comboBoxCompression.SelectedIndex == 2)
+                    radioButtonCompVerAuto.Enabled = true;
+
+                else
+                {
+                    if (CompressionOption == 2 && radioButtonCompVerAuto.Checked)
+                        radioButtonCompVer1.Checked = true;
+
+                    radioButtonCompVerAuto.Enabled = false;
+                }
+
+                CompressionOption = comboBoxCompression.SelectedIndex;
             }
         }
 
@@ -760,31 +760,41 @@ namespace PARC_Archive_Importer
 
         private void radioButtonHex_CheckedChanged(object sender, EventArgs e)
         {
-            Enabled = false;
-            Refresh();
-
-            Cursor = Cursors.WaitCursor;
-
-            foreach (ListViewItem item in listArch.Items)
+            if (listArch.Items.Count > 0)
             {
-                item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[3].Text = Convert.ToString((int)item.SubItems[3].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[4].Text = Convert.ToString((int)item.SubItems[4].Tag, radioButtonHex.Checked ? 16 : 10);
+                Cursor = Cursors.WaitCursor;
+
+                listArch.Enabled = false;
+                foreach (ListViewItem item in listArch.Items)
+                {
+                    item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[3].Text = Convert.ToString((int)item.SubItems[3].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[4].Text = Convert.ToString((int)item.SubItems[4].Tag, radioButtonHex.Checked ? 16 : 10);
+                }
+                listArch.Enabled = true;
+                listArch.Update();
+
+                if (listImport.Items.Count > 0)
+                {
+                    listImport.Enabled = false;
+                    foreach (ListViewItem item in listImport.Items)
+                    {
+                        if (item.SubItems[4].Text == "Yes")
+                        {
+                            item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
+                            item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
+                            item.SubItems[6].Text = Convert.ToString((int)item.SubItems[6].Tag, radioButtonHex.Checked ? 16 : 10);
+                            if (item.SubItems[7].Text != "--")
+                                item.SubItems[7].Text = Convert.ToString((int)item.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
+                        }
+                    }
+                    listImport.Enabled = true;
+                    listImport.Update();
+                }
+
+                Cursor = Cursors.Default;
             }
-
-            foreach (ListViewItem item in listImport.Items)
-            {
-                item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
-                item.SubItems[6].Text = Convert.ToString((int)item.SubItems[6].Tag, radioButtonHex.Checked ? 16 : 10);
-                if (item.SubItems[7].Text != "--")
-                    item.SubItems[7].Text = Convert.ToString((int)item.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
-            }
-
-            Cursor = Cursors.Default;
-
-            Enabled = true;
         }
 
         private void Form1_Resize(object sender, EventArgs e)
