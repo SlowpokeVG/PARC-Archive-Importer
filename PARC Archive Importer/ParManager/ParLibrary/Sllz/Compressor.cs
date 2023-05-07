@@ -22,11 +22,16 @@ namespace ParLibrary.Sllz
         private int Version;
         private int Endianness;
 
-
         /// <summary>
         /// Initializes the compressor parameters.
         /// </summary>
         /// <param name="parameters">Compressor configuration.</param>
+        public Compressor(CompressorParameters parameters)
+        {
+            Version = parameters.Version;
+            Endianness = parameters.Endianness;
+        }
+
         public Compressor(int Version, int Endianness)
         {
             this.Version = Version;
@@ -94,11 +99,13 @@ namespace ParLibrary.Sllz
             Encoding.ASCII.GetBytes("SLLZ").CopyTo(outputData, 0);
             outputData[4] = (byte)Endianness;
             outputData[5] = (byte)Version;
+            // These next three values are LE by default.
             outputData[6] = 0x10; // Header size
             BitConverter.GetBytes(inputData.Length).CopyTo(outputData, 8);
-            BitConverter.GetBytes(compressedData.Length + 0x10).CopyTo(outputData, 12); // data + header
+            BitConverter.GetBytes(outputData.Length).CopyTo(outputData, 12); // data + header
 
-            if (Endianness == 0)
+            // Flip LE values if Endianness is BE.
+            if (Endianness == 1)
             {
                 Array.Reverse(outputData, 6, 2);
                 Array.Reverse(outputData, 8, 4);

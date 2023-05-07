@@ -84,11 +84,13 @@ namespace PARC_Archive_Importer
                 int FileSizeOffset = Extensions.ReadInt32LE(OrigArchive, 4 + FileDescriptionOffset);
                 int FileSizeCompressedOffset = Extensions.ReadInt32LE(OrigArchive, 8 + FileDescriptionOffset);
                 string IsCompressed = "No";
-                int CompressionVersion = 0;
+                var Parameters = new CompressorParameters(0, 0);
+
                 if (OrigArchive[FileDescriptionOffset] != 0x00)
                 {
-                    CompressionVersion = OrigArchive[FileStart + 5];
-                    IsCompressed = $"Yes  (v{CompressionVersion})";
+                    Parameters.Endianness = OrigArchive[FileStart + 4];
+                    Parameters.Version = OrigArchive[FileStart + 5];
+                    IsCompressed = $"Yes  (v{Parameters.Version})";
                 }
 
                 ListViewItem item = new ListViewItem();
@@ -98,7 +100,7 @@ namespace PARC_Archive_Importer
                 item.SubItems.Add("");
                 item.SubItems.Add("");
                 item.SubItems.Add(IsCompressed);
-                item.SubItems[5].Tag = CompressionVersion;
+                item.SubItems[5].Tag = Parameters;
                 item.SubItems.Add("");
                 item.SubItems.Add(FolderNames[i]);
                 listArch.Items.Add(item);
@@ -222,7 +224,7 @@ namespace PARC_Archive_Importer
             {
                 int FileDescriptionOffset = Extensions.GetListItem(list, i, 1);
 
-                InterOpenedArchive[FileDescriptionOffset] = (byte)(Extensions.GetListItem(list, i, 5) > 0 ? 0x80 : 0x00);
+                Archive[FileDescriptionOffset] = (byte)(list.Items[i].SubItems[5].Text != "No" ? 0x80 : 0x00);
                 WriteInt32(Extensions.GetListItem(list, i, 3), Archive, 4 + FileDescriptionOffset);
                 WriteInt32(Extensions.GetListItem(list, i, 4), Archive, 8 + FileDescriptionOffset);
                 WriteInt32(Extensions.GetListItem(list, i, 2), Archive, 12 + FileDescriptionOffset);
@@ -509,17 +511,17 @@ namespace PARC_Archive_Importer
                 {
                     if (ImportedItem.SubItems[4].Text == "Yes")
                     {
-                        int origVersion = Extensions.GetListItem(listArchOriginalReference, (int)ImportedItem.SubItems[3].Tag - 1, 5);
+                        var OrigParams = (CompressorParameters)listArchOriginalReference.Items[(int)ImportedItem.SubItems[3].Tag - 1].SubItems[5].Tag;
 
-                        if (CompressionOption == 1 || CompressionOption == 2 && origVersion > 0)
+                        if (CompressionOption == 1 || CompressionOption == 2 && OrigParams.Version > 0)
                         {
                             if (radioButtonCompVerAuto.Checked)
-                                comp = new Compressor(origVersion, 0);
+                                comp = new Compressor(OrigParams);
 
                             int n = ImportedItem.Index;
 
                             if (CompressedFiles[n] == null || CompressedFiles[n].Length == 0
-                             || CompressedFiles[n][5] != (CompressionOption == 1 ? version : origVersion))
+                             || CompressedFiles[n][5] != (CompressionOption == 1 ? version : OrigParams.Version))
                             {
                                 FileStream import = File.Open(ImportedItem.SubItems[5].Text, FileMode.Open);
                                 CompressedFiles[n] = new byte[import.Length];
@@ -577,38 +579,43 @@ namespace PARC_Archive_Importer
 
                 CompressImports();
 
-                bool diff = false;
+                bool listArchChanged = false;
                 foreach (ListViewItem ImportedItem in listImport.Items)
                 {
                     if (ImportedItem.SubItems[4].Text == "Yes")
                     {
-                        int version = 0;
+                        byte Version = 0;
+                        byte Endianness = 0;
                         if (CompressionOption != 0
                          && CompressedFiles[ImportedItem.Index] != null
                          && CompressedFiles[ImportedItem.Index].Length > 0)
-                            version = CompressedFiles[ImportedItem.Index][5];
+                        {
+                            Endianness = CompressedFiles[ImportedItem.Index][4];
+                            Version = CompressedFiles[ImportedItem.Index][5];
+                        }
 
-                        if (ImportedItem.SubItems[8].Text == "No" || (int)ImportedItem.SubItems[8].Tag != version)
+                        if (ImportedItem.SubItems[8].Text == "No" || (int)ImportedItem.SubItems[8].Tag != Version)
                         {
                             int i = (int)ImportedItem.SubItems[3].Tag - 1;
 
-                            listArch.Items[i].SubItems[5].Text = version == 0 ? "No" : $"Yes  (v{version})";
-                            listArch.Items[i].SubItems[5].Tag = version;
+                            listArch.Items[i].SubItems[5].Text = Version == 0 ? "No" : $"Yes  (v{Version})";
+                            ((CompressorParameters)listArch.Items[i].SubItems[5].Tag).Version = Version;
+                            ((CompressorParameters)listArch.Items[i].SubItems[5].Tag).Endianness = Endianness;
 
                             Extensions.SetListItem(listArch, i, 3, (int)ImportedItem.SubItems[6].Tag, radioButtonHex.Checked);
-                            Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[version == 0 ? 6 : 7].Tag, radioButtonHex.Checked);
+                            Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[Version == 0 ? 6 : 7].Tag, radioButtonHex.Checked);
 
-                            ImportedItem.SubItems[8].Text = "Yes" + (version == 0 ? "" : $"  (v{version})");
-                            ImportedItem.SubItems[8].Tag = version;
+                            ImportedItem.SubItems[8].Text = "Yes" + (Version == 0 ? "" : $"  (v{Version})");
+                            ImportedItem.SubItems[8].Tag = Version;
 
-                            diff = true;
+                            listArchChanged = true;
                         }
                     }
                 }
 
                 progressBarInject.PerformStep();
 
-                if (diff)
+                if (listArchChanged)
                 {
                     UpdateFileStarts();
                     buttonRevert.Enabled = true;
