@@ -135,21 +135,6 @@ namespace PARC_Archive_Importer
 
             if (theDialog.ShowDialog() == DialogResult.OK)
             {
-                if (listImport.Items.Count > 0)
-                {
-                    if (checkBoxMuteWarnings.Checked
-                     || MessageBox.Show("The import list will be reset. Is that okay?",
-                                        "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                    {
-                        CompressedFiles = null;
-                        listImport.Items.Clear();
-                        listImport.Update();
-                        listImport.Refresh();
-                    }
-                    else
-                        return;
-                }
-
                 Cursor = Cursors.WaitCursor;
                 Refresh();
 
@@ -161,6 +146,24 @@ namespace PARC_Archive_Importer
 
         private void LoadArchive(string filename)
         {
+            if (listImport.Items.Count > 0)
+            {
+                if (checkBoxMuteWarnings.Checked
+                 || MessageBox.Show("The import list will be reset. Is that okay?",
+                                    "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    CompressedFiles = null;
+                    listImport.Items.Clear();
+                    listImport.Update();
+                    listImport.Refresh();
+
+                    buttonInject.Enabled = false;
+                    buttonClear.Enabled = false;
+                }
+                else
+                    return;
+            }
+
             try
             {
                 OpenedArchName = Path.GetFileName(filename);
@@ -263,7 +266,7 @@ namespace PARC_Archive_Importer
                 for (int m = 0; m < listArch.Items.Count; m++)
                 {
                     bool IsImported = false;
-                    
+
                     for (int n = 0; n < listImport.Items.Count; n++)
                         if (listImport.Items[n].SubItems[4].Text == "Yes" && listImport.Items[n].SubItems[8].Text != "No")
                             if (Extensions.GetListItem(listImport, n, 3) - 1 == m)

@@ -126,7 +126,7 @@
             buttonWiden.Location = new System.Drawing.Point(115, 885);
             buttonWiden.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             buttonWiden.Name = "buttonWiden";
-            buttonWiden.Size = new System.Drawing.Size(88, 27);
+            buttonWiden.Size = new System.Drawing.Size(60, 27);
             buttonWiden.TabIndex = 6;
             buttonWiden.Text = "Widen";
             buttonWiden.UseVisualStyleBackColor = true;
@@ -376,7 +376,7 @@
             // 
             buttonRevert.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             buttonRevert.Enabled = false;
-            buttonRevert.Location = new System.Drawing.Point(210, 885);
+            buttonRevert.Location = new System.Drawing.Point(182, 885);
             buttonRevert.Name = "buttonRevert";
             buttonRevert.Size = new System.Drawing.Size(106, 27);
             buttonRevert.TabIndex = 16;
