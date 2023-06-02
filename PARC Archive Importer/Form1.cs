@@ -479,21 +479,6 @@ namespace PARC_Archive_Importer
             }
         }
 
-        private int getVersionOfCompressedFiles()
-        {
-            int version = 0;
-
-            if (CompressedFiles != null && CompressedFiles.Length > 0)
-                for (int n = 0; n < CompressedFiles.Length; n++)
-                    if (CompressedFiles[n] != null && CompressedFiles[n].Length > 0)
-                    {
-                        version = CompressedFiles[n][5];
-                        break;
-                    }
-
-            return version;
-        }
-
         private void CompressImports()
         {
             if (CompressedFiles == null)
@@ -559,7 +544,7 @@ namespace PARC_Archive_Importer
                 if (FileStart % 2048 != 0)
                     Padding = 2048 - FileStart % 2048;
 
-                if (WideFile || Extensions.GetListItem(listArch, i, 4) > Padding)
+                if (WideFile || Extensions.GetListItem(listArch, i, 4) >= Padding)
                     FileStart += Padding;
 
                 Extensions.SetListItem(listArch, i, 2, FileStart, radioButtonHex.Checked);
