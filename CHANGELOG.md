@@ -71,9 +71,8 @@
   that ParseSourceArray is called only when loading a PAR file.
 - Many helper functions were simplified or eliminated by the above change,
   and repetition of work has been cut down as a result.
-- Changed the 2048 / multiplier calculations to modulus, for readability
-  if nothing else. I don't think it has an impact on performance one way
-  or the other.
+- Changed the 2048 / multiplier calculations to modulo, for readability.
+  It shouldn't have any noticeable impact on performance at this scale.
 - Controls now resize with the window.
 
 ### Fixed
