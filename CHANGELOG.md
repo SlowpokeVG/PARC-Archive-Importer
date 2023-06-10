@@ -1,6 +1,6 @@
 # Changelog
 
-## [Delay Compression] - 2023-05-07
+## [DeLay Compression (DLC)] - 2023-05-07
 
 ### Added
 - An Auto mode for compression version. Only works with Mirror PAR File.
