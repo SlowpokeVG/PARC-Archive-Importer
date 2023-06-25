@@ -28,296 +28,513 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.buttonImportFiles = new System.Windows.Forms.Button();
-            this.buttonOpenArch = new System.Windows.Forms.Button();
-            this.buttonSave = new System.Windows.Forms.Button();
-            this.buttonWiden = new System.Windows.Forms.Button();
-            this.buttonInject = new System.Windows.Forms.Button();
-            this.listArch = new System.Windows.Forms.ListView();
-            this.ListFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.FileDescStart = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.StartFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.fSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.SizeComp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.IsCompressed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.folder = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.listImport = new System.Windows.Forms.ListView();
-            this.InjFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.FileInjectedDescStart = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.FileInjectedStart = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.IDinArch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Isinarch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.listViewOriginalReference = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.SuspendLayout();
+            buttonImportFiles = new System.Windows.Forms.Button();
+            buttonOpenArch = new System.Windows.Forms.Button();
+            buttonSave = new System.Windows.Forms.Button();
+            buttonWiden = new System.Windows.Forms.Button();
+            buttonInject = new System.Windows.Forms.Button();
+            listArch = new System.Windows.Forms.ListView();
+            ListFileName = new System.Windows.Forms.ColumnHeader();
+            FileDescStart = new System.Windows.Forms.ColumnHeader();
+            StartFile = new System.Windows.Forms.ColumnHeader();
+            fSize = new System.Windows.Forms.ColumnHeader();
+            SizeComp = new System.Windows.Forms.ColumnHeader();
+            IsCompressed = new System.Windows.Forms.ColumnHeader();
+            ID = new System.Windows.Forms.ColumnHeader();
+            folder = new System.Windows.Forms.ColumnHeader();
+            listImport = new System.Windows.Forms.ListView();
+            InjFileName = new System.Windows.Forms.ColumnHeader();
+            FileInjectedDescStart = new System.Windows.Forms.ColumnHeader();
+            FileInjectedStart = new System.Windows.Forms.ColumnHeader();
+            IDinArch = new System.Windows.Forms.ColumnHeader();
+            IsinArch = new System.Windows.Forms.ColumnHeader();
+            FilePath = new System.Windows.Forms.ColumnHeader();
+            FileSize = new System.Windows.Forms.ColumnHeader();
+            CompressedSize = new System.Windows.Forms.ColumnHeader();
+            InjectedinArch = new System.Windows.Forms.ColumnHeader();
+            listArchOriginalReference = new System.Windows.Forms.ListView();
+            columnHeader1 = new System.Windows.Forms.ColumnHeader();
+            columnHeader2 = new System.Windows.Forms.ColumnHeader();
+            columnHeader3 = new System.Windows.Forms.ColumnHeader();
+            columnHeader4 = new System.Windows.Forms.ColumnHeader();
+            columnHeader5 = new System.Windows.Forms.ColumnHeader();
+            columnHeader6 = new System.Windows.Forms.ColumnHeader();
+            columnHeader7 = new System.Windows.Forms.ColumnHeader();
+            columnHeader8 = new System.Windows.Forms.ColumnHeader();
+            comboBoxCompression = new System.Windows.Forms.ComboBox();
+            checkBoxMuteWarnings = new System.Windows.Forms.CheckBox();
+            buttonClear = new System.Windows.Forms.Button();
+            buttonRevert = new System.Windows.Forms.Button();
+            radioButtonDecimal = new System.Windows.Forms.RadioButton();
+            radioButtonHex = new System.Windows.Forms.RadioButton();
+            contextMenuRightClick = new System.Windows.Forms.ContextMenuStrip(components);
+            toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
+            groupBoxCompressionVersion = new System.Windows.Forms.GroupBox();
+            radioButtonCompVerAuto = new System.Windows.Forms.RadioButton();
+            radioButtonCompVer2 = new System.Windows.Forms.RadioButton();
+            radioButtonCompVer1 = new System.Windows.Forms.RadioButton();
+            checkBoxPadLast = new System.Windows.Forms.CheckBox();
+            progressBarInject = new System.Windows.Forms.ProgressBar();
+            contextMenuRightClick.SuspendLayout();
+            groupBoxCompressionVersion.SuspendLayout();
+            SuspendLayout();
             // 
             // buttonImportFiles
             // 
-            this.buttonImportFiles.Location = new System.Drawing.Point(680, 462);
-            this.buttonImportFiles.Name = "buttonImportFiles";
-            this.buttonImportFiles.Size = new System.Drawing.Size(75, 23);
-            this.buttonImportFiles.TabIndex = 2;
-            this.buttonImportFiles.Text = "Open Files";
-            this.buttonImportFiles.UseVisualStyleBackColor = true;
-            this.buttonImportFiles.Click += new System.EventHandler(this.buttonImportFiles_Click);
+            buttonImportFiles.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            buttonImportFiles.Enabled = false;
+            buttonImportFiles.Location = new System.Drawing.Point(763, 885);
+            buttonImportFiles.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            buttonImportFiles.Name = "buttonImportFiles";
+            buttonImportFiles.Size = new System.Drawing.Size(88, 27);
+            buttonImportFiles.TabIndex = 2;
+            buttonImportFiles.Text = "Open Files";
+            buttonImportFiles.UseVisualStyleBackColor = true;
+            buttonImportFiles.Click += buttonImportFiles_Click;
             // 
             // buttonOpenArch
             // 
-            this.buttonOpenArch.Location = new System.Drawing.Point(13, 462);
-            this.buttonOpenArch.Name = "buttonOpenArch";
-            this.buttonOpenArch.Size = new System.Drawing.Size(80, 23);
-            this.buttonOpenArch.TabIndex = 4;
-            this.buttonOpenArch.Text = "Open Archive";
-            this.buttonOpenArch.UseVisualStyleBackColor = true;
-            this.buttonOpenArch.Click += new System.EventHandler(this.buttonOpenArch_Click);
+            buttonOpenArch.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            buttonOpenArch.Location = new System.Drawing.Point(15, 885);
+            buttonOpenArch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            buttonOpenArch.Name = "buttonOpenArch";
+            buttonOpenArch.Size = new System.Drawing.Size(93, 27);
+            buttonOpenArch.TabIndex = 4;
+            buttonOpenArch.Text = "Open Archive";
+            buttonOpenArch.UseVisualStyleBackColor = true;
+            buttonOpenArch.Click += buttonOpenArch_Click;
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(1084, 462);
-            this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(75, 23);
-            this.buttonSave.TabIndex = 5;
-            this.buttonSave.Text = "Save";
-            this.buttonSave.UseVisualStyleBackColor = true;
-            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
+            buttonSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            buttonSave.Enabled = false;
+            buttonSave.Location = new System.Drawing.Point(1396, 885);
+            buttonSave.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            buttonSave.Name = "buttonSave";
+            buttonSave.Size = new System.Drawing.Size(88, 27);
+            buttonSave.TabIndex = 5;
+            buttonSave.Text = "Save PAR";
+            buttonSave.UseVisualStyleBackColor = true;
+            buttonSave.Click += buttonSave_Click;
             // 
             // buttonWiden
             // 
-            this.buttonWiden.Enabled = false;
-            this.buttonWiden.Location = new System.Drawing.Point(99, 462);
-            this.buttonWiden.Name = "buttonWiden";
-            this.buttonWiden.Size = new System.Drawing.Size(75, 23);
-            this.buttonWiden.TabIndex = 6;
-            this.buttonWiden.Text = "Widen";
-            this.buttonWiden.UseVisualStyleBackColor = true;
-            this.buttonWiden.Click += new System.EventHandler(this.buttonWiden_Click);
+            buttonWiden.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            buttonWiden.Enabled = false;
+            buttonWiden.Location = new System.Drawing.Point(115, 885);
+            buttonWiden.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            buttonWiden.Name = "buttonWiden";
+            buttonWiden.Size = new System.Drawing.Size(60, 27);
+            buttonWiden.TabIndex = 6;
+            buttonWiden.Text = "Widen";
+            buttonWiden.UseVisualStyleBackColor = true;
+            buttonWiden.Click += buttonWiden_Click;
             // 
             // buttonInject
             // 
-            this.buttonInject.Location = new System.Drawing.Point(1003, 462);
-            this.buttonInject.Name = "buttonInject";
-            this.buttonInject.Size = new System.Drawing.Size(75, 23);
-            this.buttonInject.TabIndex = 7;
-            this.buttonInject.Text = "Inject";
-            this.buttonInject.UseVisualStyleBackColor = true;
-            this.buttonInject.Click += new System.EventHandler(this.buttonInject_Click);
+            buttonInject.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            buttonInject.Enabled = false;
+            buttonInject.Location = new System.Drawing.Point(1302, 885);
+            buttonInject.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            buttonInject.Name = "buttonInject";
+            buttonInject.Size = new System.Drawing.Size(88, 27);
+            buttonInject.TabIndex = 7;
+            buttonInject.Text = "Inject";
+            buttonInject.UseVisualStyleBackColor = true;
+            buttonInject.Click += buttonInject_Click;
             // 
             // listArch
             // 
-            this.listArch.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ListFileName,
-            this.FileDescStart,
-            this.StartFile,
-            this.fSize,
-            this.SizeComp,
-            this.IsCompressed,
-            this.ID,
-            this.folder});
-            this.listArch.HideSelection = false;
-            this.listArch.Location = new System.Drawing.Point(13, 12);
-            this.listArch.Name = "listArch";
-            this.listArch.Size = new System.Drawing.Size(661, 444);
-            this.listArch.TabIndex = 9;
-            this.listArch.UseCompatibleStateImageBehavior = false;
-            this.listArch.View = System.Windows.Forms.View.Details;
+            listArch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            listArch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            listArch.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { ListFileName, FileDescStart, StartFile, fSize, SizeComp, IsCompressed, ID, folder });
+            listArch.FullRowSelect = true;
+            listArch.GridLines = true;
+            listArch.Location = new System.Drawing.Point(15, 14);
+            listArch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            listArch.Name = "listArch";
+            listArch.Size = new System.Drawing.Size(740, 836);
+            listArch.TabIndex = 9;
+            listArch.UseCompatibleStateImageBehavior = false;
+            listArch.View = System.Windows.Forms.View.Details;
             // 
             // ListFileName
             // 
-            this.ListFileName.DisplayIndex = 1;
-            this.ListFileName.Text = "File Name";
-            this.ListFileName.Width = 175;
+            ListFileName.DisplayIndex = 1;
+            ListFileName.Text = "File Name";
+            ListFileName.Width = 174;
             // 
             // FileDescStart
             // 
-            this.FileDescStart.DisplayIndex = 2;
-            this.FileDescStart.Text = "Descr Start";
-            this.FileDescStart.Width = 71;
+            FileDescStart.DisplayIndex = 2;
+            FileDescStart.Text = "Desc. Start";
+            FileDescStart.Width = 70;
             // 
             // StartFile
             // 
-            this.StartFile.DisplayIndex = 3;
-            this.StartFile.Text = "File Start";
-            this.StartFile.Width = 70;
+            StartFile.DisplayIndex = 3;
+            StartFile.Text = "File Start";
+            StartFile.Width = 70;
             // 
             // fSize
             // 
-            this.fSize.DisplayIndex = 4;
-            this.fSize.Text = "Size";
-            this.fSize.Width = 78;
+            fSize.DisplayIndex = 4;
+            fSize.Text = "File Size";
+            fSize.Width = 84;
             // 
             // SizeComp
             // 
-            this.SizeComp.DisplayIndex = 5;
-            this.SizeComp.Text = "Size comp";
-            this.SizeComp.Width = 85;
+            SizeComp.DisplayIndex = 5;
+            SizeComp.Text = "Comp. Size";
+            SizeComp.Width = 84;
             // 
             // IsCompressed
             // 
-            this.IsCompressed.DisplayIndex = 6;
-            this.IsCompressed.Text = "Compressed";
-            this.IsCompressed.Width = 43;
+            IsCompressed.DisplayIndex = 6;
+            IsCompressed.Text = "Compressed";
+            IsCompressed.Width = 84;
             // 
             // ID
             // 
-            this.ID.DisplayIndex = 0;
-            this.ID.Text = "ID";
-            this.ID.Width = 41;
+            ID.DisplayIndex = 0;
+            ID.Text = "ID";
+            ID.Width = 42;
             // 
             // folder
             // 
-            this.folder.Text = "Folder";
+            folder.Text = "Folder";
+            folder.Width = 131;
             // 
             // listImport
             // 
-            this.listImport.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.InjFileName,
-            this.FileInjectedDescStart,
-            this.FileInjectedStart,
-            this.IDinArch,
-            this.Isinarch,
-            this.columnHeader9,
-            this.columnHeader10});
-            this.listImport.HideSelection = false;
-            this.listImport.Location = new System.Drawing.Point(680, 12);
-            this.listImport.Name = "listImport";
-            this.listImport.Size = new System.Drawing.Size(479, 444);
-            this.listImport.TabIndex = 10;
-            this.listImport.UseCompatibleStateImageBehavior = false;
-            this.listImport.View = System.Windows.Forms.View.Details;
+            listImport.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            listImport.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            listImport.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { InjFileName, FileInjectedDescStart, FileInjectedStart, IDinArch, IsinArch, FilePath, FileSize, CompressedSize, InjectedinArch });
+            listImport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            listImport.FullRowSelect = true;
+            listImport.GridLines = true;
+            listImport.Location = new System.Drawing.Point(763, 14);
+            listImport.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            listImport.Name = "listImport";
+            listImport.Size = new System.Drawing.Size(720, 836);
+            listImport.TabIndex = 10;
+            listImport.UseCompatibleStateImageBehavior = false;
+            listImport.View = System.Windows.Forms.View.Details;
             // 
             // InjFileName
             // 
-            this.InjFileName.Text = "File Name";
-            this.InjFileName.Width = 178;
+            InjFileName.DisplayIndex = 1;
+            InjFileName.Text = "File Name";
+            InjFileName.Width = 146;
             // 
             // FileInjectedDescStart
             // 
-            this.FileInjectedDescStart.DisplayIndex = 2;
-            this.FileInjectedDescStart.Text = "FileInjectedDescStart";
-            this.FileInjectedDescStart.Width = 68;
+            FileInjectedDescStart.DisplayIndex = 4;
+            FileInjectedDescStart.Text = "Desc. Start";
+            FileInjectedDescStart.Width = 68;
             // 
             // FileInjectedStart
             // 
-            this.FileInjectedStart.DisplayIndex = 3;
-            this.FileInjectedStart.Text = "FileInjectedStart";
-            this.FileInjectedStart.Width = 85;
+            FileInjectedStart.DisplayIndex = 5;
+            FileInjectedStart.Text = "File Start";
+            FileInjectedStart.Width = 68;
             // 
             // IDinArch
             // 
-            this.IDinArch.DisplayIndex = 4;
-            this.IDinArch.Text = "ID";
-            this.IDinArch.Width = 45;
+            IDinArch.DisplayIndex = 0;
+            IDinArch.Text = "ID";
+            IDinArch.Width = 42;
             // 
-            // Isinarch
+            // IsinArch
             // 
-            this.Isinarch.DisplayIndex = 1;
-            this.Isinarch.Text = "Exists";
-            this.Isinarch.Width = 57;
+            IsinArch.DisplayIndex = 2;
+            IsinArch.Text = "Exists";
+            IsinArch.Width = 42;
             // 
-            // columnHeader9
+            // FilePath
             // 
-            this.columnHeader9.Text = "";
+            FilePath.DisplayIndex = 8;
+            FilePath.Text = "Path";
+            FilePath.Width = 150;
             // 
-            // columnHeader10
+            // FileSize
             // 
-            this.columnHeader10.Text = "";
+            FileSize.Text = "File Size";
+            FileSize.Width = 72;
             // 
-            // listViewOriginalReference
+            // CompressedSize
             // 
-            this.listViewOriginalReference.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6,
-            this.columnHeader7,
-            this.columnHeader8});
-            this.listViewOriginalReference.Enabled = false;
-            this.listViewOriginalReference.HideSelection = false;
-            this.listViewOriginalReference.Location = new System.Drawing.Point(13, 12);
-            this.listViewOriginalReference.Name = "listViewOriginalReference";
-            this.listViewOriginalReference.Size = new System.Drawing.Size(483, 444);
-            this.listViewOriginalReference.TabIndex = 12;
-            this.listViewOriginalReference.UseCompatibleStateImageBehavior = false;
-            this.listViewOriginalReference.View = System.Windows.Forms.View.Details;
-            this.listViewOriginalReference.Visible = false;
+            CompressedSize.Text = "Comp. Size";
+            CompressedSize.Width = 72;
+            // 
+            // InjectedinArch
+            // 
+            InjectedinArch.DisplayIndex = 3;
+            InjectedinArch.Text = "Injected";
+            // 
+            // listArchOriginalReference
+            // 
+            listArchOriginalReference.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            listArchOriginalReference.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnHeader1, columnHeader2, columnHeader3, columnHeader4, columnHeader5, columnHeader6, columnHeader7, columnHeader8 });
+            listArchOriginalReference.Enabled = false;
+            listArchOriginalReference.Location = new System.Drawing.Point(15, 14);
+            listArchOriginalReference.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            listArchOriginalReference.Name = "listArchOriginalReference";
+            listArchOriginalReference.Size = new System.Drawing.Size(563, 836);
+            listArchOriginalReference.TabIndex = 12;
+            listArchOriginalReference.UseCompatibleStateImageBehavior = false;
+            listArchOriginalReference.View = System.Windows.Forms.View.Details;
+            listArchOriginalReference.Visible = false;
             // 
             // columnHeader1
             // 
-            this.columnHeader1.DisplayIndex = 1;
-            this.columnHeader1.Text = "File Name";
-            this.columnHeader1.Width = 175;
+            columnHeader1.DisplayIndex = 1;
+            columnHeader1.Text = "File Name";
+            columnHeader1.Width = 191;
             // 
             // columnHeader2
             // 
-            this.columnHeader2.DisplayIndex = 2;
-            this.columnHeader2.Text = "Descr Start";
-            this.columnHeader2.Width = 71;
+            columnHeader2.DisplayIndex = 2;
+            columnHeader2.Text = "Desc. Start";
+            columnHeader2.Width = 71;
             // 
             // columnHeader3
             // 
-            this.columnHeader3.DisplayIndex = 3;
-            this.columnHeader3.Text = "File Start";
-            this.columnHeader3.Width = 70;
+            columnHeader3.DisplayIndex = 3;
+            columnHeader3.Text = "File Start";
+            columnHeader3.Width = 70;
             // 
             // columnHeader4
             // 
-            this.columnHeader4.DisplayIndex = 4;
-            this.columnHeader4.Text = "Size";
-            this.columnHeader4.Width = 78;
+            columnHeader4.DisplayIndex = 4;
+            columnHeader4.Text = "File Size";
+            columnHeader4.Width = 78;
             // 
             // columnHeader5
             // 
-            this.columnHeader5.DisplayIndex = 5;
-            this.columnHeader5.Text = "Size comp";
-            this.columnHeader5.Width = 85;
+            columnHeader5.DisplayIndex = 5;
+            columnHeader5.Text = "Comp. Size";
+            columnHeader5.Width = 85;
             // 
             // columnHeader6
             // 
-            this.columnHeader6.DisplayIndex = 6;
-            this.columnHeader6.Text = "Compressed";
-            this.columnHeader6.Width = 43;
+            columnHeader6.DisplayIndex = 6;
+            columnHeader6.Text = "Compressed";
+            columnHeader6.Width = 43;
             // 
             // columnHeader7
             // 
-            this.columnHeader7.DisplayIndex = 0;
-            this.columnHeader7.Text = "ID";
-            this.columnHeader7.Width = 41;
+            columnHeader7.DisplayIndex = 0;
+            columnHeader7.Text = "ID";
+            columnHeader7.Width = 41;
             // 
             // columnHeader8
             // 
-            this.columnHeader8.Text = "Folder";
+            columnHeader8.Text = "Folder";
+            // 
+            // comboBoxCompression
+            // 
+            comboBoxCompression.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            comboBoxCompression.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            comboBoxCompression.Enabled = false;
+            comboBoxCompression.FormattingEnabled = true;
+            comboBoxCompression.Items.AddRange(new object[] { "All Uncompressed", "All Compressed", "Mirror PAR File" });
+            comboBoxCompression.Location = new System.Drawing.Point(1154, 890);
+            comboBoxCompression.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            comboBoxCompression.Name = "comboBoxCompression";
+            comboBoxCompression.Size = new System.Drawing.Size(140, 23);
+            comboBoxCompression.TabIndex = 13;
+            comboBoxCompression.SelectionChangeCommitted += comboBoxCompression_Commit;
+            // 
+            // checkBoxMuteWarnings
+            // 
+            checkBoxMuteWarnings.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            checkBoxMuteWarnings.AutoSize = true;
+            checkBoxMuteWarnings.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            checkBoxMuteWarnings.Location = new System.Drawing.Point(764, 860);
+            checkBoxMuteWarnings.Name = "checkBoxMuteWarnings";
+            checkBoxMuteWarnings.Size = new System.Drawing.Size(107, 19);
+            checkBoxMuteWarnings.TabIndex = 14;
+            checkBoxMuteWarnings.Text = "Mute Warnings";
+            checkBoxMuteWarnings.UseVisualStyleBackColor = true;
+            // 
+            // buttonClear
+            // 
+            buttonClear.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            buttonClear.Enabled = false;
+            buttonClear.Location = new System.Drawing.Point(858, 885);
+            buttonClear.Name = "buttonClear";
+            buttonClear.Size = new System.Drawing.Size(88, 27);
+            buttonClear.TabIndex = 15;
+            buttonClear.Text = "Clear Imports";
+            buttonClear.UseVisualStyleBackColor = true;
+            buttonClear.Click += buttonClear_Click;
+            // 
+            // buttonRevert
+            // 
+            buttonRevert.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            buttonRevert.Enabled = false;
+            buttonRevert.Location = new System.Drawing.Point(182, 885);
+            buttonRevert.Name = "buttonRevert";
+            buttonRevert.Size = new System.Drawing.Size(106, 27);
+            buttonRevert.TabIndex = 16;
+            buttonRevert.Text = "Revert Changes";
+            buttonRevert.UseVisualStyleBackColor = true;
+            buttonRevert.Click += buttonRevert_Click;
+            // 
+            // radioButtonDecimal
+            // 
+            radioButtonDecimal.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            radioButtonDecimal.AutoSize = true;
+            radioButtonDecimal.Checked = true;
+            radioButtonDecimal.Location = new System.Drawing.Point(15, 860);
+            radioButtonDecimal.Name = "radioButtonDecimal";
+            radioButtonDecimal.Size = new System.Drawing.Size(68, 19);
+            radioButtonDecimal.TabIndex = 17;
+            radioButtonDecimal.TabStop = true;
+            radioButtonDecimal.Text = "Decimal";
+            radioButtonDecimal.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonHex
+            // 
+            radioButtonHex.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            radioButtonHex.AutoSize = true;
+            radioButtonHex.Location = new System.Drawing.Point(89, 859);
+            radioButtonHex.Name = "radioButtonHex";
+            radioButtonHex.Size = new System.Drawing.Size(46, 19);
+            radioButtonHex.TabIndex = 18;
+            radioButtonHex.Text = "Hex";
+            radioButtonHex.UseVisualStyleBackColor = true;
+            radioButtonHex.CheckedChanged += radioButtonHex_CheckedChanged;
+            // 
+            // contextMenuRightClick
+            // 
+            contextMenuRightClick.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemAbout });
+            contextMenuRightClick.Name = "contextMenuRightClick";
+            contextMenuRightClick.Size = new System.Drawing.Size(241, 26);
+            contextMenuRightClick.Text = "Help";
+            // 
+            // toolStripMenuItemAbout
+            // 
+            toolStripMenuItemAbout.Name = "toolStripMenuItemAbout";
+            toolStripMenuItemAbout.Size = new System.Drawing.Size(240, 22);
+            toolStripMenuItemAbout.Text = "About PARC Archive Importer...";
+            toolStripMenuItemAbout.Click += toolStripMenuItemAbout_Click;
+            // 
+            // groupBoxCompressionVersion
+            // 
+            groupBoxCompressionVersion.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxCompressionVersion.Controls.Add(radioButtonCompVerAuto);
+            groupBoxCompressionVersion.Controls.Add(radioButtonCompVer2);
+            groupBoxCompressionVersion.Controls.Add(radioButtonCompVer1);
+            groupBoxCompressionVersion.Enabled = false;
+            groupBoxCompressionVersion.Location = new System.Drawing.Point(1154, 854);
+            groupBoxCompressionVersion.Name = "groupBoxCompressionVersion";
+            groupBoxCompressionVersion.Size = new System.Drawing.Size(140, 35);
+            groupBoxCompressionVersion.TabIndex = 19;
+            groupBoxCompressionVersion.TabStop = false;
+            groupBoxCompressionVersion.Text = "SLLZ Version";
+            // 
+            // radioButtonCompVerAuto
+            // 
+            radioButtonCompVerAuto.AutoSize = true;
+            radioButtonCompVerAuto.Checked = true;
+            radioButtonCompVerAuto.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVerAuto.Location = new System.Drawing.Point(93, 17);
+            radioButtonCompVerAuto.Name = "radioButtonCompVerAuto";
+            radioButtonCompVerAuto.Size = new System.Drawing.Size(44, 16);
+            radioButtonCompVerAuto.TabIndex = 2;
+            radioButtonCompVerAuto.TabStop = true;
+            radioButtonCompVerAuto.Text = "Auto";
+            radioButtonCompVerAuto.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonCompVer2
+            // 
+            radioButtonCompVer2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            radioButtonCompVer2.AutoSize = true;
+            radioButtonCompVer2.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer2.Location = new System.Drawing.Point(42, 17);
+            radioButtonCompVer2.Name = "radioButtonCompVer2";
+            radioButtonCompVer2.Size = new System.Drawing.Size(28, 16);
+            radioButtonCompVer2.TabIndex = 1;
+            radioButtonCompVer2.Text = "2";
+            radioButtonCompVer2.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonCompVer1
+            // 
+            radioButtonCompVer1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            radioButtonCompVer1.AutoSize = true;
+            radioButtonCompVer1.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            radioButtonCompVer1.Location = new System.Drawing.Point(7, 17);
+            radioButtonCompVer1.Name = "radioButtonCompVer1";
+            radioButtonCompVer1.Size = new System.Drawing.Size(28, 16);
+            radioButtonCompVer1.TabIndex = 0;
+            radioButtonCompVer1.Text = "1";
+            radioButtonCompVer1.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxPadLast
+            // 
+            checkBoxPadLast.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            checkBoxPadLast.AutoSize = true;
+            checkBoxPadLast.Checked = true;
+            checkBoxPadLast.CheckState = System.Windows.Forms.CheckState.Checked;
+            checkBoxPadLast.Location = new System.Drawing.Point(1396, 859);
+            checkBoxPadLast.Name = "checkBoxPadLast";
+            checkBoxPadLast.Size = new System.Drawing.Size(91, 19);
+            checkBoxPadLast.TabIndex = 20;
+            checkBoxPadLast.Text = "Pad Last File";
+            checkBoxPadLast.UseVisualStyleBackColor = true;
+            // 
+            // progressBarInject
+            // 
+            progressBarInject.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            progressBarInject.ForeColor = System.Drawing.Color.SlateBlue;
+            progressBarInject.Location = new System.Drawing.Point(1306, 888);
+            progressBarInject.Maximum = 30;
+            progressBarInject.Name = "progressBarInject";
+            progressBarInject.Size = new System.Drawing.Size(80, 21);
+            progressBarInject.Step = 1;
+            progressBarInject.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            progressBarInject.TabIndex = 21;
+            progressBarInject.Visible = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1171, 496);
-            this.Controls.Add(this.listViewOriginalReference);
-            this.Controls.Add(this.listImport);
-            this.Controls.Add(this.listArch);
-            this.Controls.Add(this.buttonInject);
-            this.Controls.Add(this.buttonWiden);
-            this.Controls.Add(this.buttonSave);
-            this.Controls.Add(this.buttonOpenArch);
-            this.Controls.Add(this.buttonImportFiles);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
-            this.Text = "PARC Archive Importer";
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1498, 924);
+            ContextMenuStrip = contextMenuRightClick;
+            Controls.Add(progressBarInject);
+            Controls.Add(checkBoxPadLast);
+            Controls.Add(groupBoxCompressionVersion);
+            Controls.Add(radioButtonHex);
+            Controls.Add(radioButtonDecimal);
+            Controls.Add(buttonRevert);
+            Controls.Add(buttonClear);
+            Controls.Add(checkBoxMuteWarnings);
+            Controls.Add(comboBoxCompression);
+            Controls.Add(listArchOriginalReference);
+            Controls.Add(listImport);
+            Controls.Add(listArch);
+            Controls.Add(buttonInject);
+            Controls.Add(buttonWiden);
+            Controls.Add(buttonSave);
+            Controls.Add(buttonOpenArch);
+            Controls.Add(buttonImportFiles);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MinimumSize = new System.Drawing.Size(1120, 600);
+            Name = "Form1";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "PARC Archive Importer";
+            Resize += Form1_Resize;
+            contextMenuRightClick.ResumeLayout(false);
+            groupBoxCompressionVersion.ResumeLayout(false);
+            groupBoxCompressionVersion.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -339,9 +556,9 @@
         private System.Windows.Forms.ColumnHeader FileInjectedDescStart;
         private System.Windows.Forms.ColumnHeader FileInjectedStart;
         private System.Windows.Forms.ColumnHeader IDinArch;
-        private System.Windows.Forms.ColumnHeader Isinarch;
+        private System.Windows.Forms.ColumnHeader IsinArch;
         private System.Windows.Forms.ColumnHeader folder;
-        private System.Windows.Forms.ListView listViewOriginalReference;
+        private System.Windows.Forms.ListView listArchOriginalReference;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
@@ -350,8 +567,24 @@
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ColumnHeader columnHeader8;
-        private System.Windows.Forms.ColumnHeader columnHeader9;
-        private System.Windows.Forms.ColumnHeader columnHeader10;
+        private System.Windows.Forms.ColumnHeader FilePath;
+        private System.Windows.Forms.ColumnHeader FileSize;
+        private System.Windows.Forms.ComboBox comboBoxCompression;
+        private System.Windows.Forms.CheckBox checkBoxMuteWarnings;
+        private System.Windows.Forms.Button buttonClear;
+        private System.Windows.Forms.Button buttonRevert;
+        private System.Windows.Forms.ColumnHeader InjectedinArch;
+        private System.Windows.Forms.ColumnHeader CompressedSize;
+        private System.Windows.Forms.RadioButton radioButtonDecimal;
+        private System.Windows.Forms.RadioButton radioButtonHex;
+        private System.Windows.Forms.ContextMenuStrip contextMenuRightClick;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAbout;
+        private System.Windows.Forms.GroupBox groupBoxCompressionVersion;
+        private System.Windows.Forms.RadioButton radioButtonCompVer2;
+        private System.Windows.Forms.RadioButton radioButtonCompVer1;
+        private System.Windows.Forms.CheckBox checkBoxPadLast;
+        private System.Windows.Forms.ProgressBar progressBarInject;
+        private System.Windows.Forms.RadioButton radioButtonCompVerAuto;
     }
 }
 

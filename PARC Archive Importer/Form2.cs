@@ -23,14 +23,14 @@ namespace PARC_Archive_Importer
         }
         public void ShowingArray(string[] array, string namefile)
         {
-            for (int i=0; i<array.Length;i++)
+            for (int i = 0; i < array.Length; i++)
             {
                 if (!string.IsNullOrEmpty(array[i]))
-                { 
-                CheckboxListItem cb1 = new CheckboxListItem();
-                cb1.Tag = i.ToString();
-                cb1.Text = array[i] + "\\" + namefile;
-                checkedListBox1.Items.Add(cb1);
+                {
+                    CheckboxListItem cb1 = new CheckboxListItem();
+                    cb1.Tag = i.ToString();
+                    cb1.Text = array[i] + "\\" + namefile;
+                    checkedListBox1.Items.Add(cb1);
 
                 }
 
@@ -61,9 +61,9 @@ namespace PARC_Archive_Importer
 
         private void button2_Click(object sender, EventArgs e)
         {
-            for (int i=0; i<checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
+            for (int i = 0; i < checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
 
-            
+
         }
 
         private void button3_Click(object sender, EventArgs e)

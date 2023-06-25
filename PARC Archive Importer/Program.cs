@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,11 +38,11 @@ namespace PARC_Archive_Importer
             return BitConverter.ToInt32(ValueBytes, 0);
         }
 
-        public static void SetListItem(ListView TargetListView, int Row, int Column, int Value)
+        public static void SetListItem(ListView TargetListView, int Row, int Column, int Value, bool HexString = false)
         {
             ListViewItem.ListViewSubItem item = TargetListView.Items[Row].SubItems[Column];
             item.Tag = Value;
-            item.Text = Value.ToString();
+            item.Text = Convert.ToString(Value, HexString ? 16 : 10);
         }
 
         public static int GetListItem(ListView TargetListView, int Row, int Column)
@@ -59,7 +59,7 @@ namespace PARC_Archive_Importer
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
         }

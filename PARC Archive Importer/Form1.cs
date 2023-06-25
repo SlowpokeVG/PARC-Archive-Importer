@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ParLibrary.Sllz;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -12,26 +15,31 @@ namespace PARC_Archive_Importer
         private int FileStartOffset;
         private int FolderCount;
 
-        public string[] FolderList;
         private int FolderStartOffset;
         private byte[] InterOpenedArchive;
-        public string NameCurrentImport;
 
         private string OpenedArchName;
         private string OpenedArchPath;
 
+        private int CompressionOption = 2;
+        private byte[][] CompressedFiles;
+
+        private bool WideFile = false;
+
+
         public Form1()
         {
             InitializeComponent();
+            comboBoxCompression.SelectedIndex = 2;
         }
 
         public static void WriteInt32(int value, byte[] target, int address)
         {
             byte[] result = new byte[4];
-            result[0] = (byte) ((value & 0xFF000000) >> 24);
-            result[1] = (byte) ((value & 0x00FF0000) >> 16);
-            result[2] = (byte) ((value & 0x0000FF00) >> 8);
-            result[3] = (byte) (value & 0x000000FF);
+            result[0] = (byte)((value & 0xFF000000) >> 24);
+            result[1] = (byte)((value & 0x00FF0000) >> 16);
+            result[2] = (byte)((value & 0x0000FF00) >> 8);
+            result[3] = (byte)(value & 0x000000FF);
 
             for (int i = 0; i <= 3; i++) target[address + i] = result[i];
         }
@@ -61,23 +69,29 @@ namespace PARC_Archive_Importer
                 int FilesInFolder = Extensions.ReadInt32LE(OrigArchive, FolderStartOffset + 8 + Folder * 32);
                 for (int m = 0; m < FilesInFolder; m++)
                     FolderNames[FolderCounter + m] = Encoding.ASCII.GetString(OrigArchive, Folder * 64 + 32, 64)
-                        .TrimEnd((char) 0);
+                        .TrimEnd((char)0);
 
                 FolderCounter += FilesInFolder;
             }
 
-            for (int ID = 1; ID <= FileCount; ID++)
+            for (int i = 0; i < FileCount; i++)
             {
-                string NameOfFile = Encoding.ASCII.GetString(OrigArchive, 32 + FolderCount * 64 + (ID - 1) * 64, 64)
-                    .TrimEnd((char) 0);
-                ;
+                string NameOfFile = Encoding.ASCII.GetString(OrigArchive, 32 + (FolderCount + i) * 64, 64)
+                    .TrimEnd((char)0);
                 FileList.Add(NameOfFile);
-                int FileDescriptionOffset = FileStartOffset + (ID - 1) * 32;
+                int FileDescriptionOffset = FileStartOffset + i * 32;
                 int FileStart = Extensions.ReadInt32LE(OrigArchive, 12 + FileDescriptionOffset);
                 int FileSizeOffset = Extensions.ReadInt32LE(OrigArchive, 4 + FileDescriptionOffset);
                 int FileSizeCompressedOffset = Extensions.ReadInt32LE(OrigArchive, 8 + FileDescriptionOffset);
                 string IsCompressed = "No";
-                if (OrigArchive[FileDescriptionOffset] != 0x00) IsCompressed = "Yes";
+                var Parameters = new CompressorParameters(0, 0);
+
+                if (OrigArchive[FileDescriptionOffset] != 0x00)
+                {
+                    Parameters.Endianness = OrigArchive[FileStart + 4];
+                    Parameters.Version = OrigArchive[FileStart + 5];
+                    IsCompressed = $"Yes  (v{Parameters.Version})";
+                }
 
                 ListViewItem item = new ListViewItem();
                 item.Text = NameOfFile;
@@ -86,30 +100,31 @@ namespace PARC_Archive_Importer
                 item.SubItems.Add("");
                 item.SubItems.Add("");
                 item.SubItems.Add(IsCompressed);
+                item.SubItems[5].Tag = Parameters;
                 item.SubItems.Add("");
-                item.SubItems.Add(FolderNames[ID - 1]);
+                item.SubItems.Add(FolderNames[i]);
                 listArch.Items.Add(item);
 
-                Extensions.SetListItem(listArch, ID - 1, 1, FileDescriptionOffset);
-                Extensions.SetListItem(listArch, ID - 1, 2, FileStart);
-                Extensions.SetListItem(listArch, ID - 1, 3, FileSizeOffset);
-                Extensions.SetListItem(listArch, ID - 1, 4, FileSizeCompressedOffset);
-                Extensions.SetListItem(listArch, ID - 1, 6, ID);
+                Extensions.SetListItem(listArch, i, 1, FileDescriptionOffset, radioButtonHex.Checked);
+                Extensions.SetListItem(listArch, i, 2, FileStart, radioButtonHex.Checked);
+                Extensions.SetListItem(listArch, i, 3, FileSizeOffset, radioButtonHex.Checked);
+                Extensions.SetListItem(listArch, i, 4, FileSizeCompressedOffset, radioButtonHex.Checked);
+                Extensions.SetListItem(listArch, i, 6, i + 1);
             }
         }
 
-        private bool IsWide()
+        private bool IsWide(ListView list)
         {
-            bool IsFileWide = true;
-            for (int i = 0; i < listArch.Items.Count - 1; i++)
-                if ((Extensions.GetListItem(listArch, i + 1, 2) -
-                     Extensions.GetListItem(listArch, i, 2)) % 2048 != 0)
+            bool wide = true;
+            for (int i = 0; i < list.Items.Count - 1; i++)
+                if ((Extensions.GetListItem(list, i + 1, 2) -
+                     Extensions.GetListItem(list, i, 2)) % 2048 != 0)
                 {
-                    IsFileWide = false;
+                    wide = false;
                     break;
                 }
 
-            return IsFileWide;
+            return wide;
         }
 
         private void buttonOpenArch_Click(object sender, EventArgs e)
@@ -119,43 +134,70 @@ namespace PARC_Archive_Importer
             theDialog.Filter = "PARC archives (*.par)|*.par|All files (*.*)|*.*";
 
             if (theDialog.ShowDialog() == DialogResult.OK)
-                try
+            {
+                Cursor = Cursors.WaitCursor;
+                Refresh();
+
+                LoadArchive(theDialog.FileName);
+
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void LoadArchive(string filename)
+        {
+            if (listImport.Items.Count > 0)
+            {
+                if (checkBoxMuteWarnings.Checked
+                 || MessageBox.Show("The import list will be reset. Is that okay?",
+                                    "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
                 {
-                    OpenedArchName = Path.GetFileName(theDialog.FileName);
-                    Text = OpenedArchName + " - PARC Archive Importer";
-                    OpenedArchPath = Path.GetDirectoryName(theDialog.FileName);
-                    InterOpenedArchive = File.ReadAllBytes(theDialog.FileName);
+                    CompressedFiles = null;
+                    listImport.Items.Clear();
+                    listImport.Update();
+                    listImport.Refresh();
 
-                    listArch.Enabled = false;
-                    listArch.Visible = false;
-
-                    ParseSourceArray(InterOpenedArchive);
-
-                    listArch.Enabled = true;
-                    listArch.Visible = true;
-                    listViewOriginalReference.Items.Clear();
-                    listViewOriginalReference.Update();
-                    listViewOriginalReference.Refresh();
-
-                    foreach (ListViewItem item in listArch.Items)
-                        listViewOriginalReference.Items.Add((ListViewItem) item.Clone());
-
-
-                    if (!IsWide())
-                    {
-                        buttonWiden.Enabled = true;
-                        buttonWiden.Text = "Widen";
-                    }
-                    else
-                    {
-                        buttonImportFiles.Enabled = true;
-                        buttonWiden.Text = "Wide";
-                    }
+                    buttonInject.Enabled = false;
+                    buttonClear.Enabled = false;
                 }
-                catch (IOException ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
+                else
+                    return;
+            }
+
+            try
+            {
+                OpenedArchName = Path.GetFileName(filename);
+                Text = OpenedArchName + " - PARC Archive Importer";
+                OpenedArchPath = Path.GetDirectoryName(filename);
+                InterOpenedArchive = File.ReadAllBytes(filename);
+
+                listArch.Enabled = false;
+                listArch.Visible = false;
+
+                ParseSourceArray(InterOpenedArchive);
+
+                listArch.Enabled = true;
+                listArch.Visible = true;
+
+                listArchOriginalReference.Items.Clear();
+
+                foreach (ListViewItem item in listArch.Items)
+                    listArchOriginalReference.Items.Add((ListViewItem)item.Clone());
+
+                WideFile = IsWide(listArchOriginalReference);
+
+                buttonWiden.Enabled = !WideFile;
+                if (WideFile) buttonWiden.Text = "Wide";
+
+                buttonImportFiles.Enabled = true;
+                comboBoxCompression.Enabled = true;
+                groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
+                buttonSave.Enabled = true;
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         private void buttonWiden_Click(object sender, EventArgs e)
@@ -163,56 +205,40 @@ namespace PARC_Archive_Importer
             Enabled = false;
             listArch.Enabled = false;
             listArch.Visible = false;
+            Cursor = Cursors.WaitCursor;
 
-            int TotalDifference = 0;
+            WideFile = true;
+            UpdateFileStarts();
 
-            for (int i = 0; i < listArch.Items.Count - 1; i++)
-            {
-                int OriginalFileSize =
-                    Extensions.GetListItem(listArch, i + 1, 2) - Extensions.GetListItem(listArch, i, 2);
+            buttonRevert.Enabled = true;
+            buttonWiden.Enabled = false;
+            buttonWiden.Text = "Wide";
 
-
-                if (OriginalFileSize % 2048 != 0)
-                {
-                    int Filesize = Extensions.GetListItem(listArch, i, 4);
-                    int Multiplier = Filesize / 2048 + 1;
-                    int NewDifference = 2048 * Multiplier - OriginalFileSize;
-
-                    TotalDifference += NewDifference;
-
-
-                    //change startpoints for files after this one
-                    for (int m = i + 1; m < listArch.Items.Count; m++)
-                    {
-                        listArch.Items[m].SubItems[2].Tag =
-                            Extensions.GetListItem(listArch, m, 2) + NewDifference;
-                        WriteInt32(Extensions.GetListItem(listArch, m, 2), InterOpenedArchive,
-                            12 + Extensions.GetListItem(listArch, m, 1));
-                    }
-                }
-            }
-
-            //change overall size
-            if (Extensions.ReadInt32LE(InterOpenedArchive, 12) != 0)
-                WriteInt32(Extensions.ReadInt32LE(InterOpenedArchive, 12) + TotalDifference, InterOpenedArchive, 12);
-
+            Cursor = Cursors.Default;
             listArch.Enabled = true;
-            Enabled = true;
             listArch.Visible = true;
+            Enabled = true;
 
-            if (!IsWide())
+        }
+
+        private void PushListToArchiveFileDescs(ListView list, byte[] Archive)
+        {
+            for (int i = 0; i < list.Items.Count; i++)
             {
-                buttonWiden.Enabled = true;
-                buttonWiden.Text = "Widen";
-            }
-            else
-            {
-                buttonWiden.Enabled = false;
-                buttonImportFiles.Enabled = true;
-                buttonWiden.Text = "Wide";
+                int FileDescriptionOffset = Extensions.GetListItem(list, i, 1);
+
+                Archive[FileDescriptionOffset] = (byte)(list.Items[i].SubItems[5].Text != "No" ? 0x80 : 0x00);
+                WriteInt32(Extensions.GetListItem(list, i, 3), Archive, 4 + FileDescriptionOffset);
+                WriteInt32(Extensions.GetListItem(list, i, 4), Archive, 8 + FileDescriptionOffset);
+                WriteInt32(Extensions.GetListItem(list, i, 2), Archive, 12 + FileDescriptionOffset);
             }
 
-            ParseSourceArray(InterOpenedArchive);
+            if (Extensions.ReadInt32LE(Archive, 12) != 0)
+            {
+                int ParSize = Extensions.GetListItem(list, list.Items.Count - 1, 2)
+                            + Extensions.GetListItem(list, list.Items.Count - 1, 4);
+                WriteInt32(ParSize, Archive, 12);
+            }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -225,50 +251,67 @@ namespace PARC_Archive_Importer
 
             if (DialogSave.FileName != "" && DialogSave.ShowDialog() == DialogResult.OK)
             {
+                Cursor = Cursors.WaitCursor;
+                Enabled = false;
+                Refresh();
+
+                byte[] ArchiveCopy = new byte[InterOpenedArchive.Length];
+                InterOpenedArchive.CopyTo(ArchiveCopy, 0);
+
+                PushListToArchiveFileDescs(listArch, ArchiveCopy);
+
                 FileStream fcreate = File.Open(DialogSave.FileName, FileMode.Create, FileAccess.Write);
-                fcreate.Write(InterOpenedArchive, 0, Extensions.GetListItem(listViewOriginalReference, 0, 2));
+                fcreate.Write(ArchiveCopy, 0, Extensions.GetListItem(listArchOriginalReference, 0, 2));
 
                 for (int m = 0; m < listArch.Items.Count; m++)
                 {
                     bool IsImported = false;
 
                     for (int n = 0; n < listImport.Items.Count; n++)
-                        if (listImport.Items[n].SubItems[4].Text == "Yes")
+                        if (listImport.Items[n].SubItems[4].Text == "Yes" && listImport.Items[n].SubItems[8].Text != "No")
                             if (Extensions.GetListItem(listImport, n, 3) - 1 == m)
                             {
-                                FileStream import = File.Open(listImport.Items[n].SubItems[5].Text, FileMode.Open);
-                                import.CopyTo(fcreate);
-                                import.Flush();
-                                import.Close();
+                                if (listArch.Items[m].SubItems[5].Text == "No")
+                                {
+                                    FileStream import = File.Open(listImport.Items[n].SubItems[5].Text, FileMode.Open);
+                                    import.CopyTo(fcreate);
+                                    import.Flush();
+                                    import.Close();
+                                }
+                                else
+                                    fcreate.Write(CompressedFiles[n], 0, CompressedFiles[n].Length);
+
                                 IsImported = true;
                                 break;
                             }
 
                     if (!IsImported)
-                        fcreate.Write(InterOpenedArchive, Extensions.GetListItem(listViewOriginalReference, m, 2),
-                            Extensions.GetListItem(listViewOriginalReference, m, 4));
+                        fcreate.Write(ArchiveCopy, Extensions.GetListItem(listArchOriginalReference, m, 2),
+                            Extensions.GetListItem(listArchOriginalReference, m, 4));
 
-                    if (m < listViewOriginalReference.Items.Count - 1)
+                    if (m < listArchOriginalReference.Items.Count - 1)
                     {
                         if (Extensions.GetListItem(listArch, m + 1, 2) > Extensions.GetListItem(listArch, m, 4) +
                             Extensions.GetListItem(listArch, m, 2))
                         {
-                            byte[] Padding = new byte[Extensions.GetListItem(listArch, m + 1, 2) -
-                                                      (Extensions.GetListItem(listArch, m, 4) +
-                                                       Extensions.GetListItem(listArch, m, 2))];
+                            byte[] Padding = new byte[Extensions.GetListItem(listArch, m + 1, 2)
+                                                    - Extensions.GetListItem(listArch, m, 4)
+                                                    - Extensions.GetListItem(listArch, m, 2)];
                             fcreate.Write(Padding, 0, Padding.Length);
                         }
                     }
-                    else
+                    else if (checkBoxPadLast.Checked)
                     {
-                        byte[] Padding = new byte[(Extensions.GetListItem(listArch, m, 4) / 2048 + 1) * 2048 -
-                                                  Extensions.GetListItem(listArch, m, 4)];
+                        byte[] Padding = new byte[2048 - (Extensions.GetListItem(listArch, m, 2) + Extensions.GetListItem(listArch, m, 4)) % 2048];
                         fcreate.Write(Padding, 0, Padding.Length);
                     }
                 }
 
                 fcreate.Flush();
                 fcreate.Close();
+
+                Enabled = true;
+                Cursor = Cursors.Default;
             }
         }
 
@@ -281,36 +324,59 @@ namespace PARC_Archive_Importer
             theDialog.Multiselect = true;
             if (theDialog.ShowDialog() == DialogResult.OK)
             {
-                listImport.Items.Clear();
-                listImport.Update();
-                listImport.Refresh();
+                if (listImport.Items.Count > 0 && !checkBoxMuteWarnings.Checked)
+                {
+                    var result = MessageBox.Show("Discard the current import list?",
+                                                 "Warning", MessageBoxButtons.YesNoCancel);
+
+                    if (result == DialogResult.Cancel)
+                        return;
+
+                    else if (result == DialogResult.Yes)
+                    {
+                        CompressedFiles = null;
+                        listImport.Items.Clear();
+                        listImport.Update();
+                        listImport.Refresh();
+                    }
+                }
+
+                Cursor = Cursors.WaitCursor;
+                listImport.Enabled = false;
+                listImport.Visible = false;
+
                 foreach (string InjectFile in theDialog.FileNames)
                 {
                     List<int> IdInArchive = new List<int>();
                     foreach (ListViewItem item in listArch.Items)
                         if (string.Equals(item.Text, Path.GetFileName(InjectFile),
                                 StringComparison.CurrentCultureIgnoreCase))
-                            IdInArchive.Add((int) item.SubItems[6].Tag);
+                            IdInArchive.Add((int)item.SubItems[6].Tag);
 
                     if (IdInArchive.Count == 1)
                     {
                         ListViewItem ImportedItem = new ListViewItem();
                         ImportedItem.Text = Path.GetFileName(InjectFile);
-
+                        int length = (int)new FileInfo(InjectFile).Length;
                         ImportedItem.SubItems.Add(listArch.Items[IdInArchive[0] - 1].SubItems[1].Text);
                         ImportedItem.SubItems.Add(listArch.Items[IdInArchive[0] - 1].SubItems[2].Text);
                         ImportedItem.SubItems.Add(listArch.Items[IdInArchive[0] - 1].SubItems[6].Text);
+                        ImportedItem.SubItems[1].Tag = listArch.Items[IdInArchive[0] - 1].SubItems[1].Tag;
+                        ImportedItem.SubItems[2].Tag = listArch.Items[IdInArchive[0] - 1].SubItems[2].Tag;
+                        ImportedItem.SubItems[3].Tag = listArch.Items[IdInArchive[0] - 1].SubItems[6].Tag;
                         ImportedItem.SubItems.Add("Yes");
-
                         ImportedItem.SubItems.Add(InjectFile);
-                        long length = new FileInfo(InjectFile).Length;
-                        ImportedItem.SubItems.Add(length.ToString());
+                        ImportedItem.SubItems.Add(Convert.ToString(length, radioButtonHex.Checked ? 16 : 10));
+                        ImportedItem.SubItems[6].Tag = length;
+                        ImportedItem.SubItems.Add("--");
+                        ImportedItem.SubItems[7].Tag = length;
+                        ImportedItem.SubItems.Add("No");
                         listImport.Items.Add(ImportedItem);
                     }
                     else if (IdInArchive.Count > 1)
                     {
-                        NameCurrentImport = Path.GetFileName(InjectFile);
-                        FolderList = new string[listArch.Items.Count];
+                        string NameCurrentImport = Path.GetFileName(InjectFile);
+                        string[] FolderList = new string[listArch.Items.Count];
 
                         foreach (int ids in IdInArchive) FolderList[ids - 1] = listArch.Items[ids - 1].SubItems[7].Text;
 
@@ -324,16 +390,20 @@ namespace PARC_Archive_Importer
                                 {
                                     ListViewItem ImportedItem = new ListViewItem();
                                     ImportedItem.Text = Path.GetFileName(InjectFile);
-                                    long length = new FileInfo(InjectFile).Length;
+                                    int length = (int)new FileInfo(InjectFile).Length;
                                     ImportedItem.SubItems.Add(listArch.Items[FileToInject].SubItems[1].Text);
                                     ImportedItem.SubItems.Add(listArch.Items[FileToInject].SubItems[2].Text);
                                     ImportedItem.SubItems.Add(listArch.Items[FileToInject].SubItems[6].Text);
+                                    ImportedItem.SubItems[1].Tag = listArch.Items[FileToInject].SubItems[1].Tag;
+                                    ImportedItem.SubItems[2].Tag = listArch.Items[FileToInject].SubItems[2].Tag;
+                                    ImportedItem.SubItems[3].Tag = listArch.Items[FileToInject].SubItems[6].Tag;
                                     ImportedItem.SubItems.Add("Yes");
                                     ImportedItem.SubItems.Add(InjectFile);
-                                    // FileInfo fInfo = new FileInfo(InjectFile);
-
-                                    ImportedItem.SubItems.Add(length.ToString());
-
+                                    ImportedItem.SubItems.Add(Convert.ToString(length, radioButtonHex.Checked ? 16 : 10));
+                                    ImportedItem.SubItems[6].Tag = length;
+                                    ImportedItem.SubItems.Add("--");
+                                    ImportedItem.SubItems[7].Tag = length;
+                                    ImportedItem.SubItems.Add("No");
                                     listImport.Items.Add(ImportedItem);
                                 }
                         }
@@ -353,67 +423,394 @@ namespace PARC_Archive_Importer
                     }
                 }
 
-                foreach (ListViewItem ImportedItem in listImport.Items)
-                    if (ImportedItem.SubItems[4].Text == "Yes")
-                    {
-                        ImportedItem.SubItems[1].Tag = int.Parse(ImportedItem.SubItems[1].Text);
-                        ImportedItem.SubItems[2].Tag = int.Parse(ImportedItem.SubItems[2].Text);
-                        ImportedItem.SubItems[3].Tag = int.Parse(ImportedItem.SubItems[3].Text);
-                        ImportedItem.SubItems[6].Tag = int.Parse(ImportedItem.SubItems[6].Text);
-                    }
+
+                if (listImport.Items.Count > 0)
+                {
+                    EliminateDuplicateImports();
+
+                    buttonClear.Enabled = true;
+                    buttonInject.Enabled = true;
+                }
+
+                listImport.Enabled = true;
+                listImport.Visible = true;
+                Cursor = Cursors.Default;
             }
         }
 
-        private byte[] ChangedHeaderImport(int differencewd, int filenumber, byte[] headerwd, int injectedfilesize)
+        private void EliminateDuplicateImports()
         {
-            //change overall size
-            if (Extensions.ReadInt32LE(headerwd, 12) != 0)
-                WriteInt32(Extensions.ReadInt32LE(headerwd, 12) + differencewd, headerwd, 12);
+            for (int n = 0; n < listImport.Items.Count; n++)
+                if (listImport.Items[n].SubItems[4].Text == "Yes")
+                    for (int other = n + 1; other < listImport.Items.Count; other++)
+                        if (listImport.Items[other].SubItems[4].Text == "Yes"
+                         && Extensions.GetListItem(listImport, n, 3) == Extensions.GetListItem(listImport, other, 3)) // Same ID
+                        {
+                            if (checkBoxMuteWarnings.Checked
+                             // Assume same path import is an intentional re-import
+                             || listImport.Items[n].SubItems[5].Text == listImport.Items[other].SubItems[5].Text
+                             || MessageBox.Show($"Import conflict at i {Extensions.GetListItem(listImport, n, 3)}." +
+                                                $"\n\nDo you want to import \"{listImport.Items[other].SubItems[5].Text}\"" +
+                                                $"\ninstead of \"{listImport.Items[n].SubItems[5].Text}\"?",
+                                                "Warning", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                listImport.Items.Remove(listImport.Items[n]);
+                                RemoveCompressedFile(n);
+                                other = n;
+                            }
+                            else
+                            {
+                                listImport.Items.Remove(listImport.Items[other]);
+                                other--;
+                            }
+                        }
+        }
 
-            //change startpoints for files after this one
-            for (int i = filenumber + 1; i < listArch.Items.Count; i++)
-                WriteInt32(Extensions.ReadInt32LE(headerwd, 12 + Extensions.GetListItem(listArch, i, 1)) +
-                           differencewd, headerwd, 12 + Extensions.GetListItem(listArch, i, 1));
+        private void RemoveCompressedFile(int index)
+        {
+            if (CompressedFiles != null && index <= CompressedFiles.Length - 1)
+            {
+                while (index < CompressedFiles.Length - 1)
+                {
+                    CompressedFiles[index] = CompressedFiles[index + 1];
+                    index++;
+                }
+                CompressedFiles[index] = null;
+            }
+        }
 
-            //change sizes for imported file
-            WriteInt32(injectedfilesize, headerwd, 4 + Extensions.GetListItem(listArch, filenumber, 1));
-            WriteInt32(injectedfilesize, headerwd, 8 + Extensions.GetListItem(listArch, filenumber, 1));
+        private void CompressImports()
+        {
+            if (CompressedFiles == null)
+                CompressedFiles = new byte[listImport.Items.Count][];
+            else if (CompressedFiles.Length < listImport.Items.Count)
+            {
+                byte[][] tempArray = new byte[listImport.Items.Count][];
+                CompressedFiles.CopyTo(tempArray, 0);
+                CompressedFiles = tempArray;
+            }
 
-            headerwd[Extensions.GetListItem(listArch, filenumber, 1)] = 0x00;
+            if (CompressionOption > 0)
+            {
+                int version = radioButtonCompVer1.Checked ? 1 : 2;
+                Compressor comp = new Compressor(version, 0);
 
-            return headerwd;
+                foreach (ListViewItem ImportedItem in listImport.Items)
+                {
+                    if (ImportedItem.SubItems[4].Text == "Yes")
+                    {
+                        var OrigParams = (CompressorParameters)listArchOriginalReference.Items[(int)ImportedItem.SubItems[3].Tag - 1].SubItems[5].Tag;
+
+                        if (CompressionOption == 1 || CompressionOption == 2 && OrigParams.Version > 0)
+                        {
+                            if (radioButtonCompVerAuto.Checked)
+                                comp = new Compressor(OrigParams);
+
+                            int n = ImportedItem.Index;
+
+                            if (CompressedFiles[n] == null || CompressedFiles[n].Length == 0
+                             || CompressedFiles[n][5] != (CompressionOption == 1 ? version : OrigParams.Version))
+                            {
+                                FileStream import = File.Open(ImportedItem.SubItems[5].Text, FileMode.Open);
+                                CompressedFiles[n] = new byte[import.Length];
+                                import.Read(CompressedFiles[n], 0, (int)import.Length);
+                                import.Flush();
+                                import.Close();
+
+                                CompressedFiles[n] = comp.Convert(CompressedFiles[n]);
+                            }
+
+                            Extensions.SetListItem(listImport, n, 7, CompressedFiles[n].Length, radioButtonHex.Checked);
+                        }
+                    }
+
+                    if (progressBarInject.Visible) progressBarInject.PerformStep();
+                }
+            }
+
+            else if (progressBarInject.Visible)
+                progressBarInject.Increment(listImport.Items.Count);
+        }
+
+        private void UpdateFileStarts()
+        {
+            // Beginning with the second item, adjust its file offset based on the previous item.
+            for (int i = 1; i < listArch.Items.Count; i++)
+            {
+                int FileStart = Extensions.GetListItem(listArch, i - 1, 2)
+                              + Extensions.GetListItem(listArch, i - 1, 4);
+
+                int Padding = 0;
+                if (FileStart % 2048 != 0)
+                    Padding = 2048 - FileStart % 2048;
+
+                if (WideFile || Extensions.GetListItem(listArch, i, 4) >= Padding)
+                    FileStart += Padding;
+
+                Extensions.SetListItem(listArch, i, 2, FileStart, radioButtonHex.Checked);
+            }
         }
 
         private void buttonInject_Click(object sender, EventArgs e)
         {
             Enabled = false;
-            listArch.Visible = false;
 
-            foreach (ListViewItem ImportedItem in listImport.Items)
-                if (ImportedItem.SubItems[4].Text == "Yes")
+            if (CompressionOption == 0 || checkBoxMuteWarnings.Checked
+             || MessageBox.Show("Files must be compressed before injection."
+             + "\nIf necessary, the process may take some time. Continue?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                Cursor = Cursors.WaitCursor;
+
+                progressBarInject.Maximum = listImport.Items.Count + 2;
+                progressBarInject.Value = 0;
+                progressBarInject.Visible = true;
+
+                CompressImports();
+
+                bool listArchChanged = false;
+                foreach (ListViewItem ImportedItem in listImport.Items)
                 {
-                    int InjectedFileSize = (int) ImportedItem.SubItems[6].Tag;
+                    if (ImportedItem.SubItems[4].Text == "Yes")
+                    {
+                        byte Version = 0;
+                        byte Endianness = 0;
+                        if (CompressionOption != 0
+                         && CompressedFiles[ImportedItem.Index] != null
+                         && CompressedFiles[ImportedItem.Index].Length > 0)
+                        {
+                            Endianness = CompressedFiles[ImportedItem.Index][4];
+                            Version = CompressedFiles[ImportedItem.Index][5];
+                        }
 
-                    int Multiplier = InjectedFileSize / 2048 + 1;
-                    int OriginalFileSize;
+                        if (ImportedItem.SubItems[8].Text == "No" || (int)ImportedItem.SubItems[8].Tag != Version)
+                        {
+                            int i = (int)ImportedItem.SubItems[3].Tag - 1;
 
-                    int i = (int) ImportedItem.SubItems[3].Tag - 1;
-                    if (listArch.Items.Count == (int) ImportedItem.SubItems[3].Tag)
-                        OriginalFileSize = Extensions.GetListItem(listArch, i, 4);
-                    else
-                        OriginalFileSize = Extensions.GetListItem(listArch, i + 1, 2) -
-                                           Extensions.GetListItem(listArch, i, 2);
+                            listArch.Items[i].SubItems[5].Text = Version == 0 ? "No" : $"Yes  (v{Version})";
+                            ((CompressorParameters)listArch.Items[i].SubItems[5].Tag).Version = Version;
+                            ((CompressorParameters)listArch.Items[i].SubItems[5].Tag).Endianness = Endianness;
 
+                            Extensions.SetListItem(listArch, i, 3, (int)ImportedItem.SubItems[6].Tag, radioButtonHex.Checked);
+                            Extensions.SetListItem(listArch, i, 4, (int)ImportedItem.SubItems[Version == 0 ? 6 : 7].Tag, radioButtonHex.Checked);
 
-                    int DifferenceInSize = 2048 * Multiplier - OriginalFileSize;
+                            ImportedItem.SubItems[8].Text = "Yes" + (Version == 0 ? "" : $"  (v{Version})");
+                            ImportedItem.SubItems[8].Tag = Version;
 
-                    ChangedHeaderImport(DifferenceInSize, i, InterOpenedArchive, InjectedFileSize);
-
-                    ParseSourceArray(InterOpenedArchive);
+                            listArchChanged = true;
+                        }
+                    }
                 }
 
+                progressBarInject.PerformStep();
+
+                if (listArchChanged)
+                {
+                    UpdateFileStarts();
+                    buttonRevert.Enabled = true;
+                }
+
+                progressBarInject.PerformStep();
+                progressBarInject.Visible = false;
+
+                listArch.Update();
+                listImport.Update();
+
+                Cursor = Cursors.Default;
+            }
+
             Enabled = true;
-            listArch.Visible = true;
+        }
+
+        private void comboBoxCompression_Commit(object sender, EventArgs e)
+        {
+            if (comboBoxCompression.SelectedIndex != CompressionOption)
+            {
+                groupBoxCompressionVersion.Enabled = comboBoxCompression.SelectedIndex != 0;
+
+                if (comboBoxCompression.SelectedIndex == 2)
+                    radioButtonCompVerAuto.Enabled = true;
+
+                else
+                {
+                    if (CompressionOption == 2 && radioButtonCompVerAuto.Checked)
+                        radioButtonCompVer1.Checked = true;
+
+                    radioButtonCompVerAuto.Enabled = false;
+                }
+
+                CompressionOption = comboBoxCompression.SelectedIndex;
+            }
+        }
+
+        private void revertListArchItemAt(int i)
+        {
+            ListViewItem orig = listArchOriginalReference.Items[i];
+
+            Extensions.SetListItem(listArch, i, 3, (int)orig.SubItems[3].Tag, radioButtonHex.Checked);
+            Extensions.SetListItem(listArch, i, 4, (int)orig.SubItems[4].Tag, radioButtonHex.Checked);
+            listArch.Items[i].SubItems[5].Text = orig.SubItems[5].Text;
+            listArch.Items[i].SubItems[5].Tag = orig.SubItems[5].Tag;
+        }
+
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            Enabled = false;
+
+            if (checkBoxMuteWarnings.Checked
+             || MessageBox.Show("Clear the list of imports?\nThis will undo all injections if any have occurred.",
+                                "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                Cursor = Cursors.WaitCursor;
+
+                listArch.Enabled = false;
+                listArch.Visible = false;
+                listImport.Enabled = false;
+                listImport.Visible = false;
+
+                bool listArchChanged = false;
+                foreach (ListViewItem item in listImport.Items)
+                    if (item.SubItems[4].Text == "Yes" && item.SubItems[8].Text != "No")
+                    {
+                        revertListArchItemAt((int)item.SubItems[3].Tag - 1);
+                        listArchChanged = true;
+                    }
+
+                if (listArchChanged)
+                {
+                    UpdateFileStarts();
+
+                    if (WideFile == IsWide(listArch))
+                        buttonRevert.Enabled = false;
+                }
+
+                listImport.Items.Clear();
+
+                CompressedFiles = null;
+
+                buttonClear.Enabled = false;
+                buttonInject.Enabled = false;
+
+                listArch.Update();
+                listImport.Update();
+
+                listArch.Enabled = true;
+                listArch.Visible = true;
+                listImport.Enabled = true;
+                listImport.Visible = true;
+
+                Cursor = Cursors.Default;
+            }
+
+            Enabled = true;
+        }
+
+        private void buttonRevert_Click(object sender, EventArgs e)
+        {
+            Enabled = false;
+
+            if (checkBoxMuteWarnings.Checked
+             || MessageBox.Show("Revert all unsaved changes to the PAR?",
+                                "Warning", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                Cursor = Cursors.WaitCursor;
+
+                listArch.Enabled = false;
+                listArch.Visible = false;
+                listImport.Enabled = false;
+                listImport.Visible = false;
+
+                listArch.Items.Clear();
+
+                foreach (ListViewItem item in listArchOriginalReference.Items)
+                    listArch.Items.Add((ListViewItem)item.Clone());
+
+                WideFile = IsWide(listArchOriginalReference);
+
+                if (listImport.Items.Count > 0)
+                {
+                    foreach (ListViewItem item in listImport.Items)
+                        if (item.SubItems[4].Text == "Yes")
+                        {
+                            item.SubItems[8].Text = "No";
+                            item.SubItems[8].Tag = null;
+                        }
+                }
+
+                buttonRevert.Enabled = false;
+
+                listArch.Update();
+                listImport.Update();
+
+                listArch.Enabled = true;
+                listArch.Visible = true;
+                listImport.Enabled = true;
+                listImport.Visible = true;
+
+                Cursor = Cursors.Default;
+            }
+
+            Enabled = true;
+        }
+
+        private void radioButtonHex_CheckedChanged(object sender, EventArgs e)
+        {
+            if (listArch.Items.Count > 0)
+            {
+                Cursor = Cursors.WaitCursor;
+
+                listArch.Enabled = false;
+                foreach (ListViewItem item in listArch.Items)
+                {
+                    item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[3].Text = Convert.ToString((int)item.SubItems[3].Tag, radioButtonHex.Checked ? 16 : 10);
+                    item.SubItems[4].Text = Convert.ToString((int)item.SubItems[4].Tag, radioButtonHex.Checked ? 16 : 10);
+                }
+                listArch.Enabled = true;
+                listArch.Update();
+
+                if (listImport.Items.Count > 0)
+                {
+                    listImport.Enabled = false;
+                    foreach (ListViewItem item in listImport.Items)
+                    {
+                        if (item.SubItems[4].Text == "Yes")
+                        {
+                            item.SubItems[1].Text = Convert.ToString((int)item.SubItems[1].Tag, radioButtonHex.Checked ? 16 : 10);
+                            item.SubItems[2].Text = Convert.ToString((int)item.SubItems[2].Tag, radioButtonHex.Checked ? 16 : 10);
+                            item.SubItems[6].Text = Convert.ToString((int)item.SubItems[6].Tag, radioButtonHex.Checked ? 16 : 10);
+                            if (item.SubItems[7].Text != "--")
+                                item.SubItems[7].Text = Convert.ToString((int)item.SubItems[7].Tag, radioButtonHex.Checked ? 16 : 10);
+                        }
+                    }
+                    listImport.Enabled = true;
+                    listImport.Update();
+                }
+
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            listArch.Width = (Width - 38) / 2 + 1;
+
+            listImport.Width = Width - listArch.Width - 54;
+            listImport.Location = new Point(15 + listArch.Width + 8, listImport.Location.Y);
+
+            checkBoxMuteWarnings.Location = new Point(listImport.Location.X, checkBoxMuteWarnings.Location.Y);
+            buttonImportFiles.Location = new Point(listImport.Location.X, buttonImportFiles.Location.Y);
+            buttonClear.Location = new Point(listImport.Location.X + buttonImportFiles.Width + 7, buttonClear.Location.Y);
+        }
+
+        private void toolStripMenuItemAbout_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("PARC Archive Importer"
+              + "\n\"Knock It Outta The PARC\" Edition!"
+              + "\n\nA tool by SlowpokeVG."
+              + "\nContributions by kurdtkobain, aposteriorist."
+              + "\n\nThanks to Kaplas80 for some code from ParManager.",
+              "About", MessageBoxButtons.OK);
         }
     }
 }
