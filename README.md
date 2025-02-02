@@ -2,7 +2,7 @@
 A tool for injecting files into .PAR archives (used in all PS3 Yakuza games and Binary Domain).
 This tool doesn't let you create a new .PAR archive and it doesn't support files bigger than 2GB. 
 For those purposes you'll want to use other tools:
-- [gibbed/Gibbed.Yakuza0](https://github.com/gibbed/Gibbed.Yakuza0)
+- [Ret-HZ/pxdArchiverCE](https://github.com/Ret-HZ/pxdArchiverCE)
 - [Kaplas80/ParManager](https://github.com/Kaplas80/ParManager)
 
 However, what this tool offers is injecting files into archives without editing other files, just their placement, so file order is preserved.
